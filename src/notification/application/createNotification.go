@@ -3,6 +3,7 @@ package application
 import (
     "Multi/src/notification/domain"
     "Multi/src/notification/domain/entities"
+    "errors"
     "time"
 )
 
@@ -16,12 +17,24 @@ func NewCreateNotificationUseCase(repo domain.NotificationRepository) *CreateNot
     }
 }
 
-func (uc *CreateNotificationUseCase) CreateNotification(houseID int, message string, typeNotification string) (*entities.Notification, error) {
+func (uc *CreateNotificationUseCase) CreateNotification(houseID int, sensorID int, sensorType string, message string) (*entities.Notification, error) {
+    validSensorTypes := map[string]bool{
+        "GasSensor":     true,
+        "MotionSensor":  true,
+        "DoorSensor":    true,
+        "WindowSensor":  true,
+        "LedControl":    true,
+    }
+    if !validSensorTypes[sensorType] {
+        return nil, errors.New("invalid sensorType: must be one of 'GasSensor', 'MotionSensor', 'DoorSensor', 'WindowSensor', or 'LedControl'")
+    }
+
     notification := &entities.Notification{
-        HouseID:          houseID,
-        Date:             time.Now(),
-        Message:          message,
-        TypeNotification: typeNotification,
+        HouseID:    houseID,
+        SensorID:   sensorID,
+        SensorType: sensorType,
+        Date:       time.Now(),
+        Message:    message,
     }
 
     err := uc.repo.Create(notification)

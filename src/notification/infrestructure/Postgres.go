@@ -21,8 +21,8 @@ func NewPostgres() domain.NotificationRepository {
 }
 
 func (pg *Postgres) Create(notification *entities.Notification) error {
-    query := "INSERT INTO notifications (house_id, date, message, type_notification) VALUES ($1, $2, $3, $4)"
-    _, err := pg.conn.ExecutePreparedQuery(query, notification.HouseID, notification.Date, notification.Message, notification.TypeNotification)
+    query := "INSERT INTO Notification (house_id, sensor_id, sensorType, date, message) VALUES ($1, $2, $3, $4, $5)"
+    _, err := pg.conn.ExecutePreparedQuery(query, notification.HouseID, notification.SensorID, notification.SensorType, notification.Date, notification.Message)
     if err != nil {
         log.Printf("Error al insertar notificación: %v", err)
         return err
@@ -31,7 +31,7 @@ func (pg *Postgres) Create(notification *entities.Notification) error {
 }
 
 func (pg *Postgres) GetAll() ([]entities.Notification, error) {
-    query := "SELECT id, house_id, date, message, type_notification FROM notifications"
+    query := "SELECT id, house_id, sensor_id, sensorType, date, message FROM Notification"
     rows := pg.conn.FetchRows(query)
     defer rows.Close()
 
@@ -39,7 +39,7 @@ func (pg *Postgres) GetAll() ([]entities.Notification, error) {
 
     for rows.Next() {
         var notification entities.Notification
-        if err := rows.Scan(&notification.ID, &notification.HouseID, &notification.Date, &notification.Message, &notification.TypeNotification); err != nil {
+        if err := rows.Scan(&notification.ID, &notification.HouseID, &notification.SensorID, &notification.SensorType, &notification.Date, &notification.Message); err != nil {
             log.Printf("Error al escanear notificación: %v", err)
             return nil, err
         }
@@ -54,13 +54,13 @@ func (pg *Postgres) GetAll() ([]entities.Notification, error) {
 }
 
 func (pg *Postgres) GetByID(id int) (*entities.Notification, error) {
-    query := "SELECT id, house_id, date, message, type_notification FROM notifications WHERE id = $1"
+    query := "SELECT id, house_id, sensor_id, sensorType, date, message FROM Notification WHERE id = $1"
     rows := pg.conn.FetchRows(query, id)
     defer rows.Close()
 
     var notification entities.Notification
     if rows.Next() {
-        if err := rows.Scan(&notification.ID, &notification.HouseID, &notification.Date, &notification.Message, &notification.TypeNotification); err != nil {
+        if err := rows.Scan(&notification.ID, &notification.HouseID, &notification.SensorID, &notification.SensorType, &notification.Date, &notification.Message); err != nil {
             log.Printf("Error al escanear notificación: %v", err)
             return nil, err
         }

@@ -6,5 +6,7 @@ import (
 )
 
 func LightRoutes(router *gin.Engine, controller *controllers.LightController) {
-    router.POST("/api/light", controller.SendLightCommand)
+    router.GET("/api/light", controller.GetAllLightData)
+    router.GET("/api/light/:id", controller.GetLightDataByID)
+    router.POST("/api/light", controller.CreateLightData)
 }

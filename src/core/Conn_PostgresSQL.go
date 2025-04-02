@@ -23,7 +23,7 @@ var (
 
 func GetDBPool() *Conn_Postgres {
     once.Do(func() {
-    	dsn := "user=max password= dbname=Domotica host=localhost port=5432 sslmode=disable"
+        dsn := "user=max password= dbname=Domotica host=localhost port=5432 sslmode=disable"
         db, err := sql.Open("postgres", dsn)
         if err != nil {
             log.Fatalf("Error al conectar con PostgreSQL: %v", err)
@@ -57,4 +57,8 @@ func (c *Conn_Postgres) FetchRows(query string, args ...interface{}) *sql.Rows {
         log.Fatalf("Error al ejecutar la consulta: %v", err)
     }
     return rows
+}
+
+func (c *Conn_Postgres) FetchRow(query string, args ...interface{}) *sql.Row {
+    return c.Db.QueryRow(query, args...)
 }

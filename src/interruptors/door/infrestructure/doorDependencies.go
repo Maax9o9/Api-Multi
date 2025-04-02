@@ -2,27 +2,27 @@ package infrestructure
 
 import (
     "Multi/src/interruptors/door/application"
+    "Multi/src/interruptors/door/application/repositorys"
+    "Multi/src/interruptors/door/application/services"
     "Multi/src/interruptors/door/infrestructure/adapters"
-    "Multi/src/interruptors/door/infrestructure/controllers"
     "log"
-
-    "github.com/streadway/amqp"
 )
 
-func InitDoor() *controllers.DoorController {
-    conn, err := amqp.Dial("amqp://user:password@localhost:5672/")
+func InitDoor() (*service.DoorService, *adapters.RabbitConsumer) {
+    rabbitMQ, err := adapters.NewRabbitConsumer(
+        "amqp://user:password@localhost:5672/",
+        "DoorQueue",
+    )
     if err != nil {
-        log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+        log.Fatalf("Failed to initialize RabbitMQ: %v", err)
     }
 
-    channel, err := conn.Channel()
-    if err != nil {
-        log.Fatalf("Failed to open a channel: %v", err)
-    }
+    rabbitRepo := repositorys.NewRabbitRepository(rabbitMQ)
+    doorRepo := NewPostgres()
 
-    rabbitAdapter := adapters.NewRabbitAdapter(channel, "DoorQueue")
-    doorUseCase := application.NewDoorUseCase(rabbitAdapter)
-    doorController := controllers.NewDoorController(doorUseCase)
+    doorUseCase := application.NewDoorUseCase(doorRepo, rabbitRepo)
 
-    return doorController
+    doorService := service.NewDoorService(doorUseCase)
+
+    return doorService, rabbitMQ
 }

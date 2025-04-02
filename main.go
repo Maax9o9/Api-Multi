@@ -3,9 +3,6 @@ package main
 import (
     infresHouse "Multi/src/house/infrestructure"
     routesHouse "Multi/src/house/infrestructure/routes"
-    infresIncidencies "Multi/src/incidencies/infrestructure"
-    incidenciesControllers "Multi/src/incidencies/infrestructure/controllers"
-    routesIncidencies "Multi/src/incidencies/infrestructure/routes"
     infresNotification "Multi/src/notification/infrestructure"
     routesNotification "Multi/src/notification/infrestructure/routes"
     infresUser "Multi/src/user/infrestructure"
@@ -15,12 +12,19 @@ import (
     routesWeather "Multi/src/weather/infrestructure/routes"
     infresLight "Multi/src/interruptors/light/infrestructure"
     routesLight "Multi/src/interruptors/light/infrestructure/routes"
+    lightControllers "Multi/src/interruptors/light/infrestructure/controllers"
     infresMovement "Multi/src/interruptors/movement/infrestructure"
     routesMovement "Multi/src/interruptors/movement/infrestructure/routes"
+    controllerMovement "Multi/src/interruptors/movement/infrestructure/controllers"
     infresDoor "Multi/src/interruptors/door/infrestructure"
     routesDoor "Multi/src/interruptors/door/infrestructure/routes"
+    controllerDoor "Multi/src/interruptors/door/infrestructure/controllers"
     infresWindow "Multi/src/interruptors/window/infrestructure"
     routesWindow "Multi/src/interruptors/window/infrestructure/routes"
+    controllerWindow "Multi/src/interruptors/window/infrestructure/controllers"
+    infresGas "Multi/src/interruptors/gas/infrestructure"
+    routesGas "Multi/src/interruptors/gas/infrestructure/routes"
+    controllerGas "Multi/src/interruptors/gas/infrestructure/controllers"
     "log"
 
     "github.com/gin-contrib/cors"
@@ -41,32 +45,37 @@ func main() {
     addHouseController, showHouseController, editHouseController := infresHouse.InitHouse()
     routesHouse.HouseRoutes(router, addHouseController, showHouseController, editHouseController)
 
-    getIncidenciesUseCase, incrementIncidencyUseCase, rabbitGas, rabbitMovement, rabbitDoor, rabbitWindow, _, rabbitMQIncidencies := infresIncidencies.InitIncidencies()
-    showIncidenciesController := incidenciesControllers.NewShowIncidenciesController(getIncidenciesUseCase)
-    incrementIncidenciesController := incidenciesControllers.NewIncrementIncidenciesController(incrementIncidencyUseCase)
-    routesIncidencies.IncidenciesRoutes(router, showIncidenciesController, incrementIncidenciesController)
-
     createNotificationController, showNotificationController := infresNotification.InitNotification()
     routesNotification.NotificationRoutes(router, createNotificationController, showNotificationController)
 
-    lightController := infresLight.InitLight()
+    lightService, rabbitMQLight := infresLight.InitLight()
+    lightController := lightControllers.NewLightController(lightService)
     routesLight.LightRoutes(router, lightController)
 
-    movementController := infresMovement.InitMovement()
+    movementService, rabbitMQMovement := infresMovement.InitMovement()
+    movementController := controllerMovement.NewMovementController(movementService)
     routesMovement.MovementRoutes(router, movementController)
 
-    doorController := infresDoor.InitDoor()
+    doorService, rabbitMQDoor := infresDoor.InitDoor()
+    doorController := controllerDoor.NewDoorController(doorService)
     routesDoor.DoorRoutes(router, doorController)
 
-    windowController := infresWindow.InitWindow()
+    windowService, rabbitMQWindow := infresWindow.InitWindow()
+    windowController := controllerWindow.NewWindowController(windowService)
     routesWindow.WindowRoutes(router, windowController)
 
+    gasService, rabbitMQGas := infresGas.InitGas()
+    gasController := controllerGas.NewGasController(gasService)
+    routesGas.GasRoutes(router, gasController)
+
     defer rabbitMQWeather.Close()
-    defer rabbitMQIncidencies.Close()
-    defer rabbitGas.Close()
-    defer rabbitMovement.Close()
-    defer rabbitDoor.Close()
-    defer rabbitWindow.Close()
+    defer rabbitMQGas.Close()
+    defer rabbitMQMovement.Close()
+    defer rabbitMQLight.Close()
+    defer rabbitMQMovement.Close()
+    defer rabbitMQDoor.Close()
+    defer rabbitMQWindow.Close()
+    defer rabbitMQGas.Close()
 
     if err := router.Run(":8080"); err != nil {
         log.Fatalf("Failed to run server: %v", err)

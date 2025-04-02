@@ -2,27 +2,27 @@ package infrestructure
 
 import (
     "Multi/src/interruptors/window/application"
+    "Multi/src/interruptors/window/application/repositorys"
+    "Multi/src/interruptors/window/application/services"
     "Multi/src/interruptors/window/infrestructure/adapters"
-    "Multi/src/interruptors/window/infrestructure/controllers"
     "log"
-
-    "github.com/streadway/amqp"
 )
 
-func InitWindow() *controllers.WindowController {
-    conn, err := amqp.Dial("amqp://user:password@localhost:5672/")
+func InitWindow() (*service.WindowService, *adapters.RabbitConsumer) {
+    rabbitMQ, err := adapters.NewRabbitConsumer(
+        "amqp://user:password@localhost:5672/",
+        "WindowQueue",
+    )
     if err != nil {
-        log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+        log.Fatalf("Failed to initialize RabbitMQ: %v", err)
     }
 
-    channel, err := conn.Channel()
-    if err != nil {
-        log.Fatalf("Failed to open a channel: %v", err)
-    }
+    rabbitRepo := repositorys.NewRabbitRepository(rabbitMQ)
+    windowRepo := NewPostgres()
 
-    rabbitAdapter := adapters.NewRabbitAdapter(channel, "WindowQueue")
-    windowUseCase := application.NewWindowUseCase(rabbitAdapter)
-    windowController := controllers.NewWindowController(windowUseCase)
+    windowUseCase := application.NewWindowUseCase(windowRepo, rabbitRepo)
 
-    return windowController
+    windowService := service.NewWindowService(windowUseCase)
+
+    return windowService, rabbitMQ
 }

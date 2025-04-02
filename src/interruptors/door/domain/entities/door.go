@@ -1,5 +1,10 @@
 package entities
 
-type DoorCommand struct {
-    State int `json:"state"`
+import "time"
+
+type DoorData struct {
+    ID        int       `json:"id"`
+    HouseID   int       `json:"house_id"`
+    CreatedAt time.Time `json:"created_at"`
+    Status    int       `json:"status"` 
 }

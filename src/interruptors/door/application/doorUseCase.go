@@ -1,20 +1,31 @@
 package application
 
 import (
-    "Multi/src/interruptors/door/domain/entities"
     "Multi/src/interruptors/door/domain"
+    "Multi/src/interruptors/door/domain/entities"
+    "Multi/src/interruptors/door/application/repositorys"
 )
 
 type DoorUseCase struct {
-    repo domain.DoorRepository
+    repo       domain.DoorRepository
+    rabbitRepo *repositorys.RabbitRepository
 }
 
-func NewDoorUseCase(repo domain.DoorRepository) *DoorUseCase {
+func NewDoorUseCase(repo domain.DoorRepository, rabbitRepo *repositorys.RabbitRepository) *DoorUseCase {
     return &DoorUseCase{
-        repo: repo,
+        repo:       repo,
+        rabbitRepo: rabbitRepo,
     }
 }
 
-func (uc *DoorUseCase) SendDoorCommand(command entities.DoorCommand) error {
-    return uc.repo.PublishDoorCommand(command)
+func (uc *DoorUseCase) GetAll() ([]entities.DoorData, error) {
+    return uc.repo.GetAll()
+}
+
+func (uc *DoorUseCase) GetByID(id int) (*entities.DoorData, error) {
+    return uc.repo.GetByID(id)
+}
+
+func (uc *DoorUseCase) Create(data *entities.DoorData) error {
+    return uc.repo.Create(data)
 }

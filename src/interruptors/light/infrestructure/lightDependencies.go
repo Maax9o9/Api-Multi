@@ -2,27 +2,27 @@ package infrestructure
 
 import (
     "Multi/src/interruptors/light/application"
+    "Multi/src/interruptors/light/application/repositorys"
+    "Multi/src/interruptors/light/application/services"
     "Multi/src/interruptors/light/infrestructure/adapters"
-    "Multi/src/interruptors/light/infrestructure/controllers"
     "log"
-
-    "github.com/streadway/amqp"
 )
 
-func InitLight() *controllers.LightController {
-    conn, err := amqp.Dial("amqp://user:password@localhost:5672/")
+func InitLight() (*service.LightService, *adapters.RabbitConsumer) {
+    rabbitMQ, err := adapters.NewRabbitConsumer(
+        "amqp://user:password@localhost:5672/",
+        "LightQueue",
+    )
     if err != nil {
-        log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+        log.Fatalf("Failed to initialize RabbitMQ: %v", err)
     }
 
-    channel, err := conn.Channel()
-    if err != nil {
-        log.Fatalf("Failed to open a channel: %v", err)
-    }
+    rabbitRepo := repositorys.NewRabbitRepository(rabbitMQ)
+    lightRepo := NewPostgres()
 
-    rabbitAdapter := adapters.NewRabbitAdapter(channel, "LightQueue")
-    lightUseCase := application.NewLightUseCase(rabbitAdapter)
-    lightController := controllers.NewLightController(lightUseCase)
+    lightUseCase := application.NewLightUseCase(lightRepo, rabbitRepo)
 
-    return lightController
+    lightService := service.NewLightService(lightUseCase)
+
+    return lightService, rabbitMQ
 }

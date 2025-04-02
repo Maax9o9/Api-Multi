@@ -6,5 +6,7 @@ import (
 )
 
 func MovementRoutes(router *gin.Engine, controller *controllers.MovementController) {
-    router.POST("/api/movement", controller.SendMovementCommand)
+    router.POST("/api/movement", controller.CreateMovementData)
+    router.GET("/api/movement", controller.GetAllMovementData)
+    router.GET("/api/movement/:id", controller.GetMovementDataByID)
 }

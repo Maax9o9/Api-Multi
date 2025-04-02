@@ -9,6 +9,7 @@ func InitNotification() (*controllers.CreateNotificationController, *controllers
     notificationRepo := NewPostgres()
 
     createNotificationUseCase := application.NewCreateNotificationUseCase(notificationRepo)
+
     showNotificationUseCase := application.NewShowNotificationUseCase(notificationRepo)
 
     createNotificationController := controllers.NewCreateNotificationController(createNotificationUseCase)

@@ -1,40 +1,98 @@
 package controllers
 
 import (
-    "Multi/src/interruptors/door/application"
+    "Multi/src/interruptors/door/application/services"
     "Multi/src/interruptors/door/domain/entities"
     "net/http"
+    "strconv"
 
     "github.com/gin-gonic/gin"
 )
 
 type DoorController struct {
-    useCase *application.DoorUseCase
+    doorService *service.DoorService
 }
 
-func NewDoorController(useCase *application.DoorUseCase) *DoorController {
+func NewDoorController(doorService *service.DoorService) *DoorController {
     return &DoorController{
-        useCase: useCase,
+        doorService: doorService,
     }
 }
 
-func (c *DoorController) SendDoorCommand(ctx *gin.Context) {
-    var command entities.DoorCommand
-    if err := ctx.ShouldBindJSON(&command); err != nil {
-        ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request", "details": err.Error()})
-        return
-    }
-
-    if command.State != 0 && command.State != 1 {
-        ctx.JSON(http.StatusBadRequest, gin.H{"error": "State must be 0 or 1"})
-        return
-    }
-
-    err := c.useCase.SendDoorCommand(command)
+func (dc *DoorController) GetAllDoorData(ctx *gin.Context) {
+    data, err := dc.doorService.GetAllDoorData()
     if err != nil {
-        ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send door command", "details": err.Error()})
+        ctx.JSON(http.StatusInternalServerError, gin.H{
+            "error":   "Failed to get door data",
+            "details": err.Error(),
+        })
+        return
+    }
+    ctx.JSON(http.StatusOK, gin.H{
+        "message": "Door data retrieved successfully",
+        "data":    data,
+    })
+}
+
+func (dc *DoorController) GetLatestDoorData(ctx *gin.Context) {
+    data, err := dc.doorService.GetLatestDoorData()
+    if err != nil {
+        ctx.JSON(http.StatusNotFound, gin.H{
+            "error":   "No recent door data available",
+            "details": err.Error(),
+        })
+        return
+    }
+    ctx.JSON(http.StatusOK, gin.H{
+        "message": "Latest door data retrieved successfully",
+        "data":    data,
+    })
+}
+
+func (dc *DoorController) CreateDoorData(ctx *gin.Context) {
+    var request entities.DoorData
+    if err := ctx.ShouldBindJSON(&request); err != nil {
+        ctx.JSON(http.StatusBadRequest, gin.H{
+            "error":   "Invalid request",
+            "details": err.Error(),
+        })
         return
     }
 
-    ctx.JSON(http.StatusOK, gin.H{"message": "Door command sent successfully"})
+    err := dc.doorService.CreateDoorData(&request)
+    if err != nil {
+        ctx.JSON(http.StatusInternalServerError, gin.H{
+            "error":   "Failed to create door data",
+            "details": err.Error(),
+        })
+        return
+    }
+
+    ctx.JSON(http.StatusCreated, gin.H{
+        "message": "Door data created successfully",
+    })
+}
+
+func (dc *DoorController) GetDoorDataByID(ctx *gin.Context) {
+    id, err := strconv.Atoi(ctx.Param("id"))
+    if err != nil {
+        ctx.JSON(http.StatusBadRequest, gin.H{
+            "error": "Invalid ID",
+        })
+        return
+    }
+
+    data, err := dc.doorService.GetDoorDataByID(id)
+    if err != nil {
+        ctx.JSON(http.StatusNotFound, gin.H{
+            "error":   "Failed to get door data",
+            "details": err.Error(),
+        })
+        return
+    }
+
+    ctx.JSON(http.StatusOK, gin.H{
+        "message": "Door data retrieved successfully",
+        "data":    data,
+    })
 }

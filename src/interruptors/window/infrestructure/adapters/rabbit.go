@@ -1,47 +1,76 @@
 package adapters
 
 import (
-    "Multi/src/interruptors/window/domain/entities"
-    "encoding/json"
-    "log"
-
     "github.com/streadway/amqp"
+    "log"
 )
 
-type RabbitAdapter struct {
-    channel *amqp.Channel
-    queue   string
+type RabbitConsumer struct {
+    connection *amqp.Connection
+    channel    *amqp.Channel
+    queue      amqp.Queue
 }
 
-func NewRabbitAdapter(channel *amqp.Channel, queue string) *RabbitAdapter {
-    return &RabbitAdapter{
-        channel: channel,
-        queue:   queue,
-    }
-}
-
-func (r *RabbitAdapter) PublishWindowCommand(command entities.WindowCommand) error {
-    message, err := json.Marshal(command)
+func NewRabbitConsumer(connectionString, queueName string) (*RabbitConsumer, error) {
+    conn, err := amqp.Dial(connectionString)
     if err != nil {
-        log.Printf("Error al serializar el comando de ventana: %v", err)
-        return err
+        log.Printf("Error al conectar con RabbitMQ: %v", err)
+        return nil, err
     }
 
-    err = r.channel.Publish(
-        "",         // exchange
-        r.queue,    // routing key
-        false,      // mandatory
-        false,      // immediate
-        amqp.Publishing{
-            ContentType: "application/json",
-            Body:        message,
-        },
+    channel, err := conn.Channel()
+    if err != nil {
+        log.Printf("Error al crear el canal de RabbitMQ: %v", err)
+        return nil, err
+    }
+
+    queue, err := channel.QueueDeclare(
+        queueName, // Nombre de la cola
+        true,      // Durable
+        false,     // Auto-delete
+        false,     // Exclusive
+        false,     // No-wait
+        nil,       // Arguments
     )
     if err != nil {
-        log.Printf("Error al publicar el comando de ventana en RabbitMQ: %v", err)
+        log.Printf("Error al declarar la cola de RabbitMQ: %v", err)
+        return nil, err
+    }
+
+    return &RabbitConsumer{
+        connection: conn,
+        channel:    channel,
+        queue:      queue,
+    }, nil
+}
+
+func (r *RabbitConsumer) ConsumeMessages(processMessage func(body []byte)) error {
+    msgs, err := r.channel.Consume(
+        r.queue.Name, // Nombre de la cola
+        "",           // Consumer
+        true,         // Auto-ack
+        false,        // Exclusive
+        false,        // No-local
+        false,        // No-wait
+        nil,          // Args
+    )
+    if err != nil {
+        log.Printf("Error al consumir mensajes de RabbitMQ: %v", err)
         return err
     }
 
-    log.Printf("Comando de ventana publicado en RabbitMQ: %+v", command)
+    for msg := range msgs {
+        processMessage(msg.Body)
+    }
+
     return nil
+}
+
+func (r *RabbitConsumer) Close() {
+    if err := r.channel.Close(); err != nil {
+        log.Printf("Error al cerrar el canal de RabbitMQ: %v", err)
+    }
+    if err := r.connection.Close(); err != nil {
+        log.Printf("Error al cerrar la conexión de RabbitMQ: %v", err)
+    }
 }

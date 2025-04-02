@@ -6,5 +6,7 @@ import (
 )
 
 func WindowRoutes(router *gin.Engine, controller *controllers.WindowController) {
-    router.POST("/api/window", controller.SendWindowCommand)
+    router.GET("/api/window", controller.GetAllWindowData)
+    router.GET("/api/window/:id", controller.GetWindowDataByID)
+    router.POST("/api/window", controller.CreateWindowData)
 }
