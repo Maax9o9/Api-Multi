@@ -8,10 +8,10 @@ import (
 func WindowRoutes(
     router *gin.Engine,
     alertController *controllers.AlertWindowController,
-    receiveController *controllers.ReceiveWindowController,
+    receiveAllController *controllers.ReceiveWindowController,
+    receiveByIDController *controllers.ReceiveWindowByIDController,
 ) {
-    router.GET("/api/window", receiveController.GetAllWindowData)
-    router.GET("/api/window/:id", receiveController.GetWindowDataByID)
-
+    router.GET("/api/window", receiveAllController.GetAllWindowData)
+    router.GET("/api/window/:id", receiveByIDController.GetWindowDataByID)
     router.POST("/api/window", alertController.CreateWindowData)
 }

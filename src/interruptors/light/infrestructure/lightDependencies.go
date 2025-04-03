@@ -22,11 +22,12 @@ func InitLight() (*service.AlertLightService, *service.ReceiveLightService, *ada
     rabbitRepo := repositorys.NewRabbitRepository(rabbitMQ)
     lightRepo := NewPostgres()
 
-    alertLightUseCase := application.NewAlertLightUseCase(lightRepo, rabbitRepo)
-    receiveLightUseCase := application.NewReceiveLightUseCase(lightRepo)
+    getAllLightUseCase := application.NewReceiveLightUseCase(lightRepo)
+    getLightByIDUseCase := application.NewReceiveLightByIDUseCase(lightRepo)
 
+    alertLightUseCase := application.NewAlertLightUseCase(lightRepo, rabbitRepo)
     alertLightService := service.NewAlertLightService(alertLightUseCase)
-    receiveLightService := service.NewReceiveLightService(receiveLightUseCase)
+    receiveLightService := service.NewReceiveLightService(getAllLightUseCase, getLightByIDUseCase)
 
     return alertLightService, receiveLightService, rabbitMQ
 }

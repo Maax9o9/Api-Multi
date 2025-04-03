@@ -9,7 +9,6 @@ import (
 )
 
 func InitWindow() (*service.AlertWindowService, *service.ReceiveWindowService, *adapters.RabbitConsumer) {
-    // Inicializar RabbitMQ
     rabbitMQ, err := adapters.NewRabbitConsumer(
         "amqp://uriel:eduardo117@3.228.81.226:5672/",
         "amq.topic",    // Exchange
@@ -23,11 +22,12 @@ func InitWindow() (*service.AlertWindowService, *service.ReceiveWindowService, *
     rabbitRepo := repositorys.NewRabbitRepository(rabbitMQ)
     windowRepo := NewPostgres()
 
-    alertWindowUseCase := application.NewAlertWindowUseCase(windowRepo, rabbitRepo)
-    receiveWindowUseCase := application.NewReceiveWindowUseCase(windowRepo)
+    getAllWindowUseCase := application.NewReceiveWindowUseCase(windowRepo)
+    getWindowByIDUseCase := application.NewReceiveWindowByIDUseCase(windowRepo)
 
+    alertWindowUseCase := application.NewAlertWindowUseCase(windowRepo, rabbitRepo)
     alertWindowService := service.NewAlertWindowService(alertWindowUseCase)
-    receiveWindowService := service.NewReceiveWindowService(receiveWindowUseCase)
+    receiveWindowService := service.NewReceiveWindowService(getAllWindowUseCase, getWindowByIDUseCase)
 
     return alertWindowService, receiveWindowService, rabbitMQ
 }

@@ -18,7 +18,3 @@ func NewReceiveDoorUseCase(repo domain.DoorRepository) *ReceiveDoorUseCase {
 func (uc *ReceiveDoorUseCase) GetAll() ([]entities.DoorData, error) {
     return uc.repo.GetAll()
 }
-
-func (uc *ReceiveDoorUseCase) GetByID(id int) (*entities.DoorData, error) {
-    return uc.repo.GetByID(id)
-}

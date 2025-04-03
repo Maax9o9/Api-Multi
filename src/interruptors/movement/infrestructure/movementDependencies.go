@@ -9,7 +9,6 @@ import (
 )
 
 func InitMovement() (*service.AlertMovementService, *service.ReceiveMovementService, *adapters.RabbitConsumer) {
-    // Inicializar RabbitMQ
     rabbitMQ, err := adapters.NewRabbitConsumer(
         "amqp://uriel:eduardo117@3.228.81.226:5672/",
         "amq.topic",    // Exchange
@@ -23,11 +22,12 @@ func InitMovement() (*service.AlertMovementService, *service.ReceiveMovementServ
     rabbitRepo := repositorys.NewRabbitRepository(rabbitMQ)
     movementRepo := NewPostgres()
 
-    alertMovementUseCase := application.NewAlertMovementUseCase(movementRepo, rabbitRepo)
-    receiveMovementUseCase := application.NewReceiveMovementUseCase(movementRepo)
+    getAllMovementUseCase := application.NewReceiveMovementUseCase(movementRepo)
+    getMovementByIDUseCase := application.NewReceiveMovementByIDUseCase(movementRepo)
 
+    alertMovementUseCase := application.NewAlertMovementUseCase(movementRepo, rabbitRepo)
     alertMovementService := service.NewAlertMovementService(alertMovementUseCase)
-    receiveMovementService := service.NewReceiveMovementService(receiveMovementUseCase)
+    receiveMovementService := service.NewReceiveMovementService(getAllMovementUseCase, getMovementByIDUseCase)
 
     return alertMovementService, receiveMovementService, rabbitMQ
 }

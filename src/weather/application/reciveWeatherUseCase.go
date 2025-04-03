@@ -18,7 +18,3 @@ func NewReceiveWeatherUseCase(repo domain.WeatherRepository) *ReceiveWeatherUseC
 func (uc *ReceiveWeatherUseCase) GetAllWeatherData() ([]entities.SensorDataWeather, error) {
     return uc.repo.GetAll()
 }
-
-func (uc *ReceiveWeatherUseCase) GetWeatherDataByID(id int) (*entities.SensorDataWeather, error) {
-    return uc.repo.GetByID(id)
-}

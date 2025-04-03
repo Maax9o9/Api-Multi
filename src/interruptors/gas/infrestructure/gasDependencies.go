@@ -22,11 +22,12 @@ func InitGas() (*service.AlertGasService, *service.ReceiveGasService, *adapters.
     rabbitRepo := repositorys.NewRabbitRepository(rabbitMQ)
     gasRepo := NewPostgres()
 
-    alertGasUseCase := application.NewAlertGasUseCase(gasRepo, rabbitRepo)
-    receiveGasUseCase := application.NewReceiveGasUseCase(gasRepo)
+    getAllGasUseCase := application.NewReceiveGasUseCase(gasRepo)
+    getGasByIDUseCase := application.NewReceiveGasByIDUseCase(gasRepo)
 
+    alertGasUseCase := application.NewAlertGasUseCase(gasRepo, rabbitRepo)
     alertGasService := service.NewAlertGasService(alertGasUseCase)
-    receiveGasService := service.NewReceiveGasService(receiveGasUseCase)
+    receiveGasService := service.NewReceiveGasService(getAllGasUseCase, getGasByIDUseCase)
 
     return alertGasService, receiveGasService, rabbitMQ
 }

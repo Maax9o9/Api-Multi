@@ -7,24 +7,29 @@ import (
     "Multi/src/interruptors/door/domain/entities"
 )
 
-type ReceiveDoorUseCase interface {
+type GetAllDoorUseCase interface {
     GetAll() ([]entities.DoorData, error)
+}
+
+type GetDoorByIDUseCase interface {
     GetByID(id int) (*entities.DoorData, error)
 }
 
 type ReceiveDoorService struct {
-    useCase    ReceiveDoorUseCase
-    latestData *entities.DoorData
+    getAllUseCase  GetAllDoorUseCase
+    getByIDUseCase GetDoorByIDUseCase
+    latestData     *entities.DoorData
 }
 
-func NewReceiveDoorService(useCase ReceiveDoorUseCase) *ReceiveDoorService {
+func NewReceiveDoorService(getAllUseCase GetAllDoorUseCase, getByIDUseCase GetDoorByIDUseCase) *ReceiveDoorService {
     return &ReceiveDoorService{
-        useCase: useCase,
+        getAllUseCase:  getAllUseCase,
+        getByIDUseCase: getByIDUseCase,
     }
 }
 
 func (s *ReceiveDoorService) GetAllDoorData() ([]entities.DoorData, error) {
-    data, err := s.useCase.GetAll()
+    data, err := s.getAllUseCase.GetAll()
     if err != nil {
         log.Printf("Error al obtener todos los datos de la puerta: %v", err)
         return nil, err
@@ -33,7 +38,7 @@ func (s *ReceiveDoorService) GetAllDoorData() ([]entities.DoorData, error) {
 }
 
 func (s *ReceiveDoorService) GetDoorDataByID(id int) (*entities.DoorData, error) {
-    data, err := s.useCase.GetByID(id)
+    data, err := s.getByIDUseCase.GetByID(id)
     if err != nil {
         log.Printf("Error al obtener datos de la puerta por ID: %v", err)
         return nil, err
@@ -49,7 +54,7 @@ func (s *ReceiveDoorService) GetLatestDoorData() (*entities.DoorData, error) {
 }
 
 func (s *ReceiveDoorService) UpdateLatestDoorData() error {
-    data, err := s.useCase.GetAll()
+    data, err := s.getAllUseCase.GetAll()
     if err != nil {
         log.Printf("Error al actualizar los datos de la puerta: %v", err)
         return err

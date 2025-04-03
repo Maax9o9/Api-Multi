@@ -8,9 +8,10 @@ import (
 func GasRoutes(
     router *gin.Engine,
     alertController *controllers.AlertGasController,
-    receiveController *controllers.ReceiveGasController,
+    receiveAllController *controllers.ReceiveGasController,
+    receiveByIDController *controllers.ReceiveGasByIDController,
 ) {
-    router.GET("/api/gas", receiveController.GetAllGasData)
-    router.GET("/api/gas/:id", receiveController.GetGasDataByID)
+    router.GET("/api/gas", receiveAllController.GetAllGasData)
+    router.GET("/api/gas/:id", receiveByIDController.GetGasDataByID)
     router.POST("/api/gas", alertController.CreateGasData)
 }

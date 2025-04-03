@@ -1,24 +1,20 @@
 package application
 
 import (
-    "Multi/src/user/domain/entities"
     "Multi/src/user/domain"
+    "Multi/src/user/domain/entities"
 )
 
-type ShowUsersUseCase struct {
+type ShowAllUsersUseCase struct {
     repo domain.UserRepository
 }
 
-func NewShowUsersUseCase(repo domain.UserRepository) *ShowUsersUseCase {
-    return &ShowUsersUseCase{
+func NewShowAllUsersUseCase(repo domain.UserRepository) *ShowAllUsersUseCase {
+    return &ShowAllUsersUseCase{
         repo: repo,
     }
 }
 
-func (uc *ShowUsersUseCase) GetAllUsers() ([]entities.User, error) {
+func (uc *ShowAllUsersUseCase) GetAllUsers() ([]entities.User, error) {
     return uc.repo.GetAll()
-}
-
-func (uc *ShowUsersUseCase) GetUserByID(id int) (*entities.User, error) {
-    return uc.repo.GetByID(id)
 }

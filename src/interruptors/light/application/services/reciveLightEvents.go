@@ -7,24 +7,29 @@ import (
     "Multi/src/interruptors/light/domain/entities"
 )
 
-type ReceiveLightUseCase interface {
+type GetAllLightUseCase interface {
     GetAllLightData() ([]entities.LightData, error)
+}
+
+type GetLightByIDUseCase interface {
     GetLightDataByID(id int) (*entities.LightData, error)
 }
 
 type ReceiveLightService struct {
-    useCase    ReceiveLightUseCase
-    latestData *entities.LightData
+    getAllUseCase  GetAllLightUseCase
+    getByIDUseCase GetLightByIDUseCase
+    latestData     *entities.LightData
 }
 
-func NewReceiveLightService(useCase ReceiveLightUseCase) *ReceiveLightService {
+func NewReceiveLightService(getAllUseCase GetAllLightUseCase, getByIDUseCase GetLightByIDUseCase) *ReceiveLightService {
     return &ReceiveLightService{
-        useCase: useCase,
+        getAllUseCase:  getAllUseCase,
+        getByIDUseCase: getByIDUseCase,
     }
 }
 
 func (s *ReceiveLightService) GetAllLightData() ([]entities.LightData, error) {
-    data, err := s.useCase.GetAllLightData()
+    data, err := s.getAllUseCase.GetAllLightData()
     if err != nil {
         log.Printf("Error al obtener todos los datos de la luz: %v", err)
         return nil, err
@@ -33,7 +38,7 @@ func (s *ReceiveLightService) GetAllLightData() ([]entities.LightData, error) {
 }
 
 func (s *ReceiveLightService) GetLightDataByID(id int) (*entities.LightData, error) {
-    data, err := s.useCase.GetLightDataByID(id)
+    data, err := s.getByIDUseCase.GetLightDataByID(id)
     if err != nil {
         log.Printf("Error al obtener datos de la luz por ID: %v", err)
         return nil, err
@@ -49,7 +54,7 @@ func (s *ReceiveLightService) GetLatestLightData() (*entities.LightData, error) 
 }
 
 func (s *ReceiveLightService) UpdateLatestLightData() error {
-    data, err := s.useCase.GetAllLightData()
+    data, err := s.getAllUseCase.GetAllLightData()
     if err != nil {
         log.Printf("Error al actualizar los datos de la luz: %v", err)
         return err

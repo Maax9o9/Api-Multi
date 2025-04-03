@@ -5,15 +5,17 @@ import (
     "Multi/src/user/infrestructure/controllers"
 )
 
-func InitUser() (*controllers.CreateUserController, *controllers.ShowUserController, *controllers.LoginController) {
+func InitUser() (*controllers.CreateUserController, *controllers.ShowAllUsersController, *controllers.ShowUserByIDController, *controllers.LoginController) {
     userRepo := NewPostgres()
 
     createUserUseCase := application.NewCreateUserUseCase(userRepo)
-    showUsersUseCase := application.NewShowUsersUseCase(userRepo)
+    showAllUsersUseCase := application.NewShowAllUsersUseCase(userRepo)
+    showUserByIDUseCase := application.NewShowUserByIDUseCase(userRepo)
 
     createUserController := controllers.NewCreateUserController(createUserUseCase)
-    showUserController := controllers.NewShowUserController(showUsersUseCase)
+    showAllUsersController := controllers.NewShowAllUsersController(showAllUsersUseCase)
+    showUserByIDController := controllers.NewShowUserByIDController(showUserByIDUseCase)
     loginController := controllers.NewLoginController(userRepo)
 
-    return createUserController, showUserController, loginController
+    return createUserController, showAllUsersController, showUserByIDController, loginController
 }

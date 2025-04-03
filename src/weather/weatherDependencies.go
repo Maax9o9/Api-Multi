@@ -22,11 +22,12 @@ func InitWeather() (*service.AlertWeatherService, *service.ReceiveWeatherService
     rabbitRepo := repositorys.NewRabbitRepository(rabbitMQ)
     weatherRepo := NewPostgres()
 
-    alertWeatherUseCase := application.NewAlertWeatherUseCase(weatherRepo, rabbitRepo)
-    receiveWeatherUseCase := application.NewReceiveWeatherUseCase(weatherRepo)
+    getAllWeatherUseCase := application.NewReceiveWeatherUseCase(weatherRepo)
+    getWeatherByIDUseCase := application.NewReceiveWeatherByIDUseCase(weatherRepo)
 
+    alertWeatherUseCase := application.NewAlertWeatherUseCase(weatherRepo, rabbitRepo)
     alertWeatherService := service.NewAlertWeatherService(alertWeatherUseCase)
-    receiveWeatherService := service.NewReceiveWeatherService(receiveWeatherUseCase)
+    receiveWeatherService := service.NewReceiveWeatherService(getAllWeatherUseCase, getWeatherByIDUseCase)
 
     return alertWeatherService, receiveWeatherService, rabbitMQ
 }

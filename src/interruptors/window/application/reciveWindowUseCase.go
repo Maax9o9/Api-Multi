@@ -18,7 +18,3 @@ func NewReceiveWindowUseCase(repo domain.WindowRepository) *ReceiveWindowUseCase
 func (uc *ReceiveWindowUseCase) GetAllWindowData() ([]entities.WindowSensor, error) {
     return uc.repo.GetAll()
 }
-
-func (uc *ReceiveWindowUseCase) GetWindowDataByID(id int) (*entities.WindowSensor, error) {
-    return uc.repo.GetByID(id)
-}

@@ -5,20 +5,16 @@ import (
     "Multi/src/notification/domain/entities"
 )
 
-type ShowNotificationUseCase struct {
+type ShowAllNotificationsUseCase struct {
     repo domain.NotificationRepository
 }
 
-func NewShowNotificationUseCase(repo domain.NotificationRepository) *ShowNotificationUseCase {
-    return &ShowNotificationUseCase{
+func NewShowAllNotificationsUseCase(repo domain.NotificationRepository) *ShowAllNotificationsUseCase {
+    return &ShowAllNotificationsUseCase{
         repo: repo,
     }
 }
 
-func (uc *ShowNotificationUseCase) GetAllNotifications() ([]entities.Notification, error) {
+func (uc *ShowAllNotificationsUseCase) GetAllNotifications() ([]entities.Notification, error) {
     return uc.repo.GetAll()
-}
-
-func (uc *ShowNotificationUseCase) GetNotificationByID(id int) (*entities.Notification, error) {
-    return uc.repo.GetByID(id)
 }

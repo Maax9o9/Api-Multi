@@ -7,24 +7,29 @@ import (
     "Multi/src/interruptors/movement/domain/entities"
 )
 
-type ReceiveMovementUseCase interface {
+type GetAllMovementUseCase interface {
     GetAll() ([]entities.MotionSensor, error)
+}
+
+type GetMovementByIDUseCase interface {
     GetByID(id int) (*entities.MotionSensor, error)
 }
 
 type ReceiveMovementService struct {
-    useCase    ReceiveMovementUseCase
-    latestData *entities.MotionSensor
+    getAllUseCase  GetAllMovementUseCase
+    getByIDUseCase GetMovementByIDUseCase
+    latestData     *entities.MotionSensor
 }
 
-func NewReceiveMovementService(useCase ReceiveMovementUseCase) *ReceiveMovementService {
+func NewReceiveMovementService(getAllUseCase GetAllMovementUseCase, getByIDUseCase GetMovementByIDUseCase) *ReceiveMovementService {
     return &ReceiveMovementService{
-        useCase: useCase,
+        getAllUseCase:  getAllUseCase,
+        getByIDUseCase: getByIDUseCase,
     }
 }
 
 func (s *ReceiveMovementService) GetAllMovementData() ([]entities.MotionSensor, error) {
-    data, err := s.useCase.GetAll()
+    data, err := s.getAllUseCase.GetAll()
     if err != nil {
         log.Printf("Error al obtener todos los datos de movimiento: %v", err)
         return nil, err
@@ -33,7 +38,7 @@ func (s *ReceiveMovementService) GetAllMovementData() ([]entities.MotionSensor, 
 }
 
 func (s *ReceiveMovementService) GetMovementDataByID(id int) (*entities.MotionSensor, error) {
-    data, err := s.useCase.GetByID(id)
+    data, err := s.getByIDUseCase.GetByID(id)
     if err != nil {
         log.Printf("Error al obtener datos de movimiento por ID: %v", err)
         return nil, err
@@ -49,7 +54,7 @@ func (s *ReceiveMovementService) GetLatestMovementData() (*entities.MotionSensor
 }
 
 func (s *ReceiveMovementService) UpdateLatestMovementData() error {
-    data, err := s.useCase.GetAll()
+    data, err := s.getAllUseCase.GetAll()
     if err != nil {
         log.Printf("Error al actualizar los datos de movimiento: %v", err)
         return err

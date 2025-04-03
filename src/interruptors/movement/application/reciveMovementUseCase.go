@@ -18,7 +18,3 @@ func NewReceiveMovementUseCase(repo domain.MovementRepository) *ReceiveMovementU
 func (uc *ReceiveMovementUseCase) GetAll() ([]entities.MotionSensor, error) {
     return uc.repo.GetAll()
 }
-
-func (uc *ReceiveMovementUseCase) GetByID(id int) (*entities.MotionSensor, error) {
-    return uc.repo.GetByID(id)
-}

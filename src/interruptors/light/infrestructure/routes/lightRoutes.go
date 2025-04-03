@@ -8,9 +8,10 @@ import (
 func LightRoutes(
     router *gin.Engine,
     alertController *controllers.AlertLightController,
-    receiveController *controllers.ReceiveLightController,
+    receiveAllController *controllers.ReceiveLightController,
+    receiveByIDController *controllers.ReceiveLightByIDController,
 ) {
-    router.GET("/api/light", receiveController.GetAllLightData)
-    router.GET("/api/light/:id", receiveController.GetLightDataByID)
+    router.GET("/api/light", receiveAllController.GetAllLightData)
+    router.GET("/api/light/:id", receiveByIDController.GetLightDataByID)
     router.POST("/api/light", alertController.CreateLightData)
 }

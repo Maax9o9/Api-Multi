@@ -5,15 +5,16 @@ import (
     "Multi/src/notification/infrestructure/controllers"
 )
 
-func InitNotification() (*controllers.CreateNotificationController, *controllers.ShowNotificationController) {
+func InitNotification() (*controllers.CreateNotificationController, *controllers.ShowAllNotificationsController, *controllers.ShowNotificationByIDController) {
     notificationRepo := NewPostgres()
 
     createNotificationUseCase := application.NewCreateNotificationUseCase(notificationRepo)
-
-    showNotificationUseCase := application.NewShowNotificationUseCase(notificationRepo)
+    showAllNotificationsUseCase := application.NewShowAllNotificationsUseCase(notificationRepo)
+    showNotificationByIDUseCase := application.NewShowNotificationByIDUseCase(notificationRepo)
 
     createNotificationController := controllers.NewCreateNotificationController(createNotificationUseCase)
-    showNotificationController := controllers.NewShowNotificationController(showNotificationUseCase)
+    showAllNotificationsController := controllers.NewShowAllNotificationsController(showAllNotificationsUseCase)
+    showNotificationByIDController := controllers.NewShowNotificationByIDController(showNotificationByIDUseCase)
 
-    return createNotificationController, showNotificationController
+    return createNotificationController, showAllNotificationsController, showNotificationByIDController
 }

@@ -18,7 +18,3 @@ func NewReceiveLightUseCase(repo domain.LightRepository) *ReceiveLightUseCase {
 func (uc *ReceiveLightUseCase) GetAllLightData() ([]entities.LightData, error) {
     return uc.repo.GetAll()
 }
-
-func (uc *ReceiveLightUseCase) GetLightDataByID(id int) (*entities.LightData, error) {
-    return uc.repo.GetByID(id)
-}

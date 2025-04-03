@@ -13,6 +13,9 @@ import (
     infresLight "Multi/src/interruptors/light/infrestructure"
     routesLight "Multi/src/interruptors/light/infrestructure/routes"
     controllerLight "Multi/src/interruptors/light/infrestructure/controllers"
+    infresLightOutside "Multi/src/interruptors/lightOutside/infrestructure"
+    routesLightOutside "Multi/src/interruptors/lightOutside/infrestructure/routes"
+    controllerLightOutside "Multi/src/interruptors/lightOutside/infrestructure/controllers"
     infresMovement "Multi/src/interruptors/movement/infrestructure"
     routesMovement "Multi/src/interruptors/movement/infrestructure/routes"
     controllerMovement "Multi/src/interruptors/movement/infrestructure/controllers"
@@ -37,50 +40,64 @@ func main() {
 
     alertWeatherService, receiveWeatherService, rabbitMQWeather := infresWeather.InitWeather()
     alertWeatherController := controllerWeather.NewAlertWeatherController(alertWeatherService)
-    receiveWeatherController := controllerWeather.NewReceiveWeatherController(receiveWeatherService)
-    routesWeather.WeatherRoutes(router, alertWeatherController, receiveWeatherController)
+    receiveWeatherAllController := controllerWeather.NewReceiveWeatherController(receiveWeatherService)
+    receiveWeatherByIDController := controllerWeather.NewReceiveWeatherByIDController(receiveWeatherService)
+    routesWeather.WeatherRoutes(router, alertWeatherController, receiveWeatherAllController, receiveWeatherByIDController)
 
-    createUserController, showUserController, loginController := infresUser.InitUser()
-    routesUser.UserRoutes(router, createUserController, showUserController, loginController)
+    createUserController, showAllUsersController, showUserByIDController, loginController := infresUser.InitUser()
+    routesUser.UserRoutes(router, createUserController, showAllUsersController, showUserByIDController, loginController)
 
-    addHouseController, showHouseController, editHouseController := infresHouse.InitHouse()
-    routesHouse.HouseRoutes(router, addHouseController, showHouseController, editHouseController)
+    addHouseController, showAllHousesController, showHouseByIDController, editHouseController := infresHouse.InitHouse()
+    routesHouse.HouseRoutes(router, addHouseController, showAllHousesController, showHouseByIDController, editHouseController)
 
-    createNotificationController, showNotificationController := infresNotification.InitNotification()
-    routesNotification.NotificationRoutes(router, createNotificationController, showNotificationController)
+    createNotificationController, showAllNotificationsController, showNotificationByIDController := infresNotification.InitNotification()
+    routesNotification.NotificationRoutes(router, createNotificationController, showAllNotificationsController, showNotificationByIDController)
 
     alertLightService, receiveLightService, rabbitMQLight := infresLight.InitLight()
     alertLightController := controllerLight.NewAlertLightController(alertLightService)
-    receiveLightController := controllerLight.NewReceiveLightController(receiveLightService)
-    routesLight.LightRoutes(router, alertLightController, receiveLightController)
+    receiveLightAllController := controllerLight.NewReceiveLightController(receiveLightService)
+    receiveLightByIDController := controllerLight.NewReceiveLightByIDController(receiveLightService)
+    routesLight.LightRoutes(router, alertLightController, receiveLightAllController, receiveLightByIDController)
+
+    alertLightOutsideService, receiveLightOutsideService, rabbitMQLightOutside := infresLightOutside.InitLightOutside()
+    alertLightOutsideController := controllerLightOutside.NewAlertLightController(alertLightOutsideService)
+    receiveLightOutsideAllController := controllerLightOutside.NewReceiveLightController(receiveLightOutsideService)
+    receiveLightOutsideByIDController := controllerLightOutside.NewReceiveLightByIDController(receiveLightOutsideService)
+    routesLightOutside.LightRoutes(router, alertLightOutsideController, receiveLightOutsideAllController, receiveLightOutsideByIDController)
 
     alertMovementService, receiveMovementService, rabbitMQMovement := infresMovement.InitMovement()
     alertMovementController := controllerMovement.NewAlertMovementController(alertMovementService)
-    receiveMovementController := controllerMovement.NewReceiveMovementController(receiveMovementService)
-    routesMovement.MovementRoutes(router, alertMovementController, receiveMovementController)
+    receiveMovementAllController := controllerMovement.NewReceiveMovementController(receiveMovementService)
+    receiveMovementByIDController := controllerMovement.NewReceiveMovementByIDController(receiveMovementService)
+    routesMovement.MovementRoutes(router, alertMovementController, receiveMovementAllController, receiveMovementByIDController)
 
     alertDoorService, receiveDoorService, rabbitMQDoor := infresDoor.InitDoor()
     alertDoorController := controllersDoor.NewAlertDoorController(alertDoorService)
-    receiveDoorController := controllersDoor.NewReceiveDoorController(receiveDoorService)
-    routesDoor.DoorRoutes(router, alertDoorController, receiveDoorController)
+    reciveDoorController := controllersDoor.NewGetAllDoorController(receiveDoorService)
+    reciveDoorByIDController := controllersDoor.NewGetDoorByIDController(receiveDoorService)
+    routesDoor.DoorRoutes(router, alertDoorController, reciveDoorController, reciveDoorByIDController)
 
     alertWindowService, receiveWindowService, rabbitMQWindow := infresWindow.InitWindow()
     alertWindowController := controllerWindow.NewAlertWindowController(alertWindowService)
-    receiveWindowController := controllerWindow.NewReceiveWindowController(receiveWindowService)
-    routesWindow.WindowRoutes(router, alertWindowController, receiveWindowController)
+    receiveWindowAllController := controllerWindow.NewReceiveWindowController(receiveWindowService)
+    receiveWindowByIDController := controllerWindow.NewReceiveWindowByIDController(receiveWindowService)
+    routesWindow.WindowRoutes(router, alertWindowController, receiveWindowAllController, receiveWindowByIDController)
 
     alertGasService, receiveGasService, rabbitMQGas := infresGas.InitGas()
     alertGasController := controllerGas.NewAlertGasController(alertGasService)
-    receiveGasController := controllerGas.NewReceiveGasController(receiveGasService)
-    routesGas.GasRoutes(router, alertGasController, receiveGasController)
+    receiveGasAllController := controllerGas.NewReceiveGasController(receiveGasService)
+    receiveGasByIDController := controllerGas.NewReceiveGasByIDController(receiveGasService)
+    routesGas.GasRoutes(router, alertGasController, receiveGasAllController, receiveGasByIDController)
 
-    defer rabbitMQWeather.Close()
     defer rabbitMQGas.Close()
+    defer rabbitMQWeather.Close()
     defer rabbitMQMovement.Close()
     defer rabbitMQLight.Close()
+    defer rabbitMQLightOutside.Close()
     defer rabbitMQDoor.Close()
     defer rabbitMQWindow.Close()
 
+    // Iniciar servidor
     if err := router.Run(":8080"); err != nil {
         log.Fatalf("Failed to run server: %v", err)
     }

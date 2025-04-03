@@ -8,9 +8,11 @@ import (
 func WeatherRoutes(
     router *gin.Engine,
     alertController *controllers.AlertWeatherController,
-    receiveController *controllers.ReceiveWeatherController,
+    receiveAllController *controllers.ReceiveWeatherController,
+    receiveByIDController *controllers.ReceiveWeatherByIDController,
 ) {
-    router.GET("/api/weather", receiveController.GetAllWeatherData)
-    router.GET("/api/weather/latest", receiveController.GetLatestWeatherData)
+    router.GET("/api/weather", receiveAllController.GetAllWeatherData)
+    router.GET("/api/weather/latest", receiveAllController.GetLatestWeatherData)
+    router.GET("/api/weather/:id", receiveByIDController.GetWeatherDataByID)
     router.POST("/api/weather", alertController.ProcessWeatherData)
 }

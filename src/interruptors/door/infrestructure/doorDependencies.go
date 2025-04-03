@@ -9,7 +9,6 @@ import (
 )
 
 func InitDoor() (*service.AlertDoorService, *service.ReceiveDoorService, *adapters.RabbitConsumer) {
-    // Inicializar RabbitMQ
     rabbitMQ, err := adapters.NewRabbitConsumer(
         "amqp://uriel:eduardo117@3.228.81.226:5672/",
         "amq.topic",    // Exchange
@@ -23,11 +22,12 @@ func InitDoor() (*service.AlertDoorService, *service.ReceiveDoorService, *adapte
     rabbitRepo := repositorys.NewRabbitRepository(rabbitMQ)
     doorRepo := NewPostgres()
 
-    alertDoorUseCase := application.NewAlertDoorUseCase(doorRepo, rabbitRepo)
-    receiveDoorUseCase := application.NewReceiveDoorUseCase(doorRepo)
+    getAllDoorUseCase := application.NewReceiveDoorUseCase(doorRepo)
+    getDoorByIDUseCase := application.NewGetDoorByIDUseCase(doorRepo)
 
+    alertDoorUseCase := application.NewAlertDoorUseCase(doorRepo, rabbitRepo)
     alertDoorService := service.NewAlertDoorService(alertDoorUseCase)
-    receiveDoorService := service.NewReceiveDoorService(receiveDoorUseCase)
+    receiveDoorService := service.NewReceiveDoorService(getAllDoorUseCase, getDoorByIDUseCase)
 
     return alertDoorService, receiveDoorService, rabbitMQ
 }

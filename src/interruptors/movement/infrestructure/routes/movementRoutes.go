@@ -8,9 +8,10 @@ import (
 func MovementRoutes(
     router *gin.Engine,
     alertController *controllers.AlertMovementController,
-    receiveController *controllers.ReceiveMovementController,
+    receiveAllController *controllers.ReceiveMovementController,
+    receiveByIDController *controllers.ReceiveMovementByIDController,
 ) {
     router.POST("/api/movement", alertController.CreateMovementData)
-    router.GET("/api/movement", receiveController.GetAllMovementData)
-    router.GET("/api/movement/:id", receiveController.GetMovementDataByID)
+    router.GET("/api/movement", receiveAllController.GetAllMovementData)
+    router.GET("/api/movement/:id", receiveByIDController.GetMovementDataByID)
 }

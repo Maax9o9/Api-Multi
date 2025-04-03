@@ -7,19 +7,24 @@ import (
     "Multi/src/interruptors/gas/domain/entities"
 )
 
-type ReceiveGasUseCase interface {
+type GetAllGasUseCase interface {
     GetAllGasData() ([]entities.GasSensor, error)
+}
+
+type GetGasByIDUseCase interface {
     GetGasDataByID(id int) (*entities.GasSensor, error)
 }
 
 type ReceiveGasService struct {
-    useCase    ReceiveGasUseCase
-    latestData *entities.GasSensor
+    getAllUseCase  GetAllGasUseCase
+    getByIDUseCase GetGasByIDUseCase
+    latestData     *entities.GasSensor
 }
 
-func NewReceiveGasService(useCase ReceiveGasUseCase) *ReceiveGasService {
+func NewReceiveGasService(getAllUseCase GetAllGasUseCase, getByIDUseCase GetGasByIDUseCase) *ReceiveGasService {
     return &ReceiveGasService{
-        useCase: useCase,
+        getAllUseCase:  getAllUseCase,
+        getByIDUseCase: getByIDUseCase,
     }
 }
 
@@ -31,7 +36,7 @@ func (s *ReceiveGasService) GetLatestGasData() (*entities.GasSensor, error) {
 }
 
 func (s *ReceiveGasService) GetAllGasData() ([]entities.GasSensor, error) {
-    data, err := s.useCase.GetAllGasData()
+    data, err := s.getAllUseCase.GetAllGasData()
     if err != nil {
         log.Printf("Error al obtener todos los datos de gas: %v", err)
         return nil, err
@@ -40,7 +45,7 @@ func (s *ReceiveGasService) GetAllGasData() ([]entities.GasSensor, error) {
 }
 
 func (s *ReceiveGasService) GetGasDataByID(id int) (*entities.GasSensor, error) {
-    data, err := s.useCase.GetGasDataByID(id)
+    data, err := s.getByIDUseCase.GetGasDataByID(id)
     if err != nil {
         log.Printf("Error al obtener datos de gas por ID: %v", err)
         return nil, err

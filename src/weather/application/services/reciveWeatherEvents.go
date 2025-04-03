@@ -7,24 +7,29 @@ import (
     "Multi/src/weather/domain/entities"
 )
 
-type ReceiveWeatherUseCase interface {
+type GetAllWeatherUseCase interface {
     GetAllWeatherData() ([]entities.SensorDataWeather, error)
+}
+
+type GetWeatherByIDUseCase interface {
     GetWeatherDataByID(id int) (*entities.SensorDataWeather, error)
 }
 
 type ReceiveWeatherService struct {
-    useCase    ReceiveWeatherUseCase
-    latestData *entities.SensorDataWeather
+    getAllUseCase  GetAllWeatherUseCase
+    getByIDUseCase GetWeatherByIDUseCase
+    latestData     *entities.SensorDataWeather
 }
 
-func NewReceiveWeatherService(useCase ReceiveWeatherUseCase) *ReceiveWeatherService {
+func NewReceiveWeatherService(getAllUseCase GetAllWeatherUseCase, getByIDUseCase GetWeatherByIDUseCase) *ReceiveWeatherService {
     return &ReceiveWeatherService{
-        useCase: useCase,
+        getAllUseCase:  getAllUseCase,
+        getByIDUseCase: getByIDUseCase,
     }
 }
 
 func (s *ReceiveWeatherService) GetAllWeatherData() ([]entities.SensorDataWeather, error) {
-    data, err := s.useCase.GetAllWeatherData()
+    data, err := s.getAllUseCase.GetAllWeatherData()
     if err != nil {
         log.Printf("Error al obtener todos los datos meteorológicos: %v", err)
         return nil, err
@@ -33,7 +38,7 @@ func (s *ReceiveWeatherService) GetAllWeatherData() ([]entities.SensorDataWeathe
 }
 
 func (s *ReceiveWeatherService) GetWeatherDataByID(id int) (*entities.SensorDataWeather, error) {
-    data, err := s.useCase.GetWeatherDataByID(id)
+    data, err := s.getByIDUseCase.GetWeatherDataByID(id)
     if err != nil {
         log.Printf("Error al obtener datos meteorológicos por ID: %v", err)
         return nil, err
@@ -49,7 +54,7 @@ func (s *ReceiveWeatherService) GetLatestWeatherData() (*entities.SensorDataWeat
 }
 
 func (s *ReceiveWeatherService) UpdateLatestWeatherData() error {
-    data, err := s.useCase.GetAllWeatherData()
+    data, err := s.getAllUseCase.GetAllWeatherData()
     if err != nil {
         log.Printf("Error al actualizar los datos meteorológicos: %v", err)
         return err
