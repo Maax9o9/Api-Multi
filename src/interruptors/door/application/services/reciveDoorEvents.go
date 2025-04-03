@@ -7,31 +7,23 @@ import (
     "Multi/src/interruptors/door/domain/entities"
 )
 
-type DoorUseCase interface {
+type ReceiveDoorUseCase interface {
     GetAll() ([]entities.DoorData, error)
     GetByID(id int) (*entities.DoorData, error)
-    Create(data *entities.DoorData) error
 }
 
-type DoorService struct {
-    useCase    DoorUseCase
+type ReceiveDoorService struct {
+    useCase    ReceiveDoorUseCase
     latestData *entities.DoorData
 }
 
-func NewDoorService(useCase DoorUseCase) *DoorService {
-    return &DoorService{
+func NewReceiveDoorService(useCase ReceiveDoorUseCase) *ReceiveDoorService {
+    return &ReceiveDoorService{
         useCase: useCase,
     }
 }
 
-func (s *DoorService) GetLatestDoorData() (*entities.DoorData, error) {
-    if s.latestData == nil {
-        return nil, fmt.Errorf("no hay datos recientes de la puerta")
-    }
-    return s.latestData, nil
-}
-
-func (s *DoorService) GetAllDoorData() ([]entities.DoorData, error) {
+func (s *ReceiveDoorService) GetAllDoorData() ([]entities.DoorData, error) {
     data, err := s.useCase.GetAll()
     if err != nil {
         log.Printf("Error al obtener todos los datos de la puerta: %v", err)
@@ -40,7 +32,7 @@ func (s *DoorService) GetAllDoorData() ([]entities.DoorData, error) {
     return data, nil
 }
 
-func (s *DoorService) GetDoorDataByID(id int) (*entities.DoorData, error) {
+func (s *ReceiveDoorService) GetDoorDataByID(id int) (*entities.DoorData, error) {
     data, err := s.useCase.GetByID(id)
     if err != nil {
         log.Printf("Error al obtener datos de la puerta por ID: %v", err)
@@ -49,16 +41,14 @@ func (s *DoorService) GetDoorDataByID(id int) (*entities.DoorData, error) {
     return data, nil
 }
 
-func (s *DoorService) CreateDoorData(data *entities.DoorData) error {
-    err := s.useCase.Create(data)
-    if err != nil {
-        log.Printf("Error al crear datos de la puerta: %v", err)
-        return err
+func (s *ReceiveDoorService) GetLatestDoorData() (*entities.DoorData, error) {
+    if s.latestData == nil {
+        return nil, fmt.Errorf("no hay datos recientes de la puerta")
     }
-    return nil
+    return s.latestData, nil
 }
 
-func (s *DoorService) UpdateLatestDoorData() error {
+func (s *ReceiveDoorService) UpdateLatestDoorData() error {
     data, err := s.useCase.GetAll()
     if err != nil {
         log.Printf("Error al actualizar los datos de la puerta: %v", err)
@@ -72,7 +62,7 @@ func (s *DoorService) UpdateLatestDoorData() error {
     return nil
 }
 
-func (s *DoorService) SerializeDoorData(data []entities.DoorData) (string, error) {
+func (s *ReceiveDoorService) SerializeDoorData(data []entities.DoorData) (string, error) {
     jsonData, err := json.Marshal(data)
     if err != nil {
         log.Printf("Error al serializar los datos de la puerta: %v", err)

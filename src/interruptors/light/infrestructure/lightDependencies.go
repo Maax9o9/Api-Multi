@@ -8,12 +8,12 @@ import (
     "log"
 )
 
-func InitLight() (*service.LightService, *adapters.RabbitConsumer) {
+func InitLight() (*service.AlertLightService, *service.ReceiveLightService, *adapters.RabbitConsumer) {
     rabbitMQ, err := adapters.NewRabbitConsumer(
         "amqp://uriel:eduardo117@3.228.81.226:5672/",
-        "amq.topic",                       
-        "light",                           
-        "light.on",                      
+        "amq.topic",    // Exchange
+        "light",        // Queue
+        "light.on",     // Routing Key
     )
     if err != nil {
         log.Fatalf("Failed to initialize RabbitMQ: %v", err)
@@ -22,9 +22,11 @@ func InitLight() (*service.LightService, *adapters.RabbitConsumer) {
     rabbitRepo := repositorys.NewRabbitRepository(rabbitMQ)
     lightRepo := NewPostgres()
 
-    lightUseCase := application.NewLightUseCase(lightRepo, rabbitRepo)
+    alertLightUseCase := application.NewAlertLightUseCase(lightRepo, rabbitRepo)
+    receiveLightUseCase := application.NewReceiveLightUseCase(lightRepo)
 
-    lightService := service.NewLightService(lightUseCase)
+    alertLightService := service.NewAlertLightService(alertLightUseCase)
+    receiveLightService := service.NewReceiveLightService(receiveLightUseCase)
 
-    return lightService, rabbitMQ
+    return alertLightService, receiveLightService, rabbitMQ
 }

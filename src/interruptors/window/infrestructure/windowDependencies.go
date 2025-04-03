@@ -8,12 +8,13 @@ import (
     "log"
 )
 
-func InitWindow() (*service.WindowService, *adapters.RabbitConsumer) {
+func InitWindow() (*service.AlertWindowService, *service.ReceiveWindowService, *adapters.RabbitConsumer) {
+    // Inicializar RabbitMQ
     rabbitMQ, err := adapters.NewRabbitConsumer(
         "amqp://uriel:eduardo117@3.228.81.226:5672/",
-        "amq.topic",
-        "ventana",                          
-        "sensor.ventana",                     
+        "amq.topic",    // Exchange
+        "ventana",      // Queue
+        "sensor.ventana", // Routing Key
     )
     if err != nil {
         log.Fatalf("Failed to initialize RabbitMQ: %v", err)
@@ -22,9 +23,11 @@ func InitWindow() (*service.WindowService, *adapters.RabbitConsumer) {
     rabbitRepo := repositorys.NewRabbitRepository(rabbitMQ)
     windowRepo := NewPostgres()
 
-    windowUseCase := application.NewWindowUseCase(windowRepo, rabbitRepo)
+    alertWindowUseCase := application.NewAlertWindowUseCase(windowRepo, rabbitRepo)
+    receiveWindowUseCase := application.NewReceiveWindowUseCase(windowRepo)
 
-    windowService := service.NewWindowService(windowUseCase)
+    alertWindowService := service.NewAlertWindowService(alertWindowUseCase)
+    receiveWindowService := service.NewReceiveWindowService(receiveWindowUseCase)
 
-    return windowService, rabbitMQ
+    return alertWindowService, receiveWindowService, rabbitMQ
 }

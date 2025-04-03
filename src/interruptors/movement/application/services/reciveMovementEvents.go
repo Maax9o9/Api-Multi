@@ -7,31 +7,23 @@ import (
     "Multi/src/interruptors/movement/domain/entities"
 )
 
-type MovementUseCase interface {
+type ReceiveMovementUseCase interface {
     GetAll() ([]entities.MotionSensor, error)
     GetByID(id int) (*entities.MotionSensor, error)
-    Create(data *entities.MotionSensor) error
 }
 
-type MovementService struct {
-    useCase    MovementUseCase
+type ReceiveMovementService struct {
+    useCase    ReceiveMovementUseCase
     latestData *entities.MotionSensor
 }
 
-func NewMovementService(useCase MovementUseCase) *MovementService {
-    return &MovementService{
+func NewReceiveMovementService(useCase ReceiveMovementUseCase) *ReceiveMovementService {
+    return &ReceiveMovementService{
         useCase: useCase,
     }
 }
 
-func (s *MovementService) GetLatestMovementData() (*entities.MotionSensor, error) {
-    if s.latestData == nil {
-        return nil, fmt.Errorf("no hay datos recientes de movimiento")
-    }
-    return s.latestData, nil
-}
-
-func (s *MovementService) GetAllMovementData() ([]entities.MotionSensor, error) {
+func (s *ReceiveMovementService) GetAllMovementData() ([]entities.MotionSensor, error) {
     data, err := s.useCase.GetAll()
     if err != nil {
         log.Printf("Error al obtener todos los datos de movimiento: %v", err)
@@ -40,7 +32,7 @@ func (s *MovementService) GetAllMovementData() ([]entities.MotionSensor, error) 
     return data, nil
 }
 
-func (s *MovementService) GetMovementDataByID(id int) (*entities.MotionSensor, error) {
+func (s *ReceiveMovementService) GetMovementDataByID(id int) (*entities.MotionSensor, error) {
     data, err := s.useCase.GetByID(id)
     if err != nil {
         log.Printf("Error al obtener datos de movimiento por ID: %v", err)
@@ -49,16 +41,14 @@ func (s *MovementService) GetMovementDataByID(id int) (*entities.MotionSensor, e
     return data, nil
 }
 
-func (s *MovementService) CreateMovementData(data *entities.MotionSensor) error {
-    err := s.useCase.Create(data)
-    if err != nil {
-        log.Printf("Error al crear datos de movimiento: %v", err)
-        return err
+func (s *ReceiveMovementService) GetLatestMovementData() (*entities.MotionSensor, error) {
+    if s.latestData == nil {
+        return nil, fmt.Errorf("no hay datos recientes de movimiento")
     }
-    return nil
+    return s.latestData, nil
 }
 
-func (s *MovementService) UpdateLatestMovementData() error {
+func (s *ReceiveMovementService) UpdateLatestMovementData() error {
     data, err := s.useCase.GetAll()
     if err != nil {
         log.Printf("Error al actualizar los datos de movimiento: %v", err)
@@ -72,7 +62,7 @@ func (s *MovementService) UpdateLatestMovementData() error {
     return nil
 }
 
-func (s *MovementService) SerializeMovementData(data []entities.MotionSensor) (string, error) {
+func (s *ReceiveMovementService) SerializeMovementData(data []entities.MotionSensor) (string, error) {
     jsonData, err := json.Marshal(data)
     if err != nil {
         log.Printf("Error al serializar los datos de movimiento: %v", err)

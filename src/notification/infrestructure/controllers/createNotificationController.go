@@ -19,7 +19,6 @@ func NewCreateNotificationController(useCase *application.CreateNotificationUseC
 
 func (c *CreateNotificationController) CreateNotification(ctx *gin.Context) {
     var request struct {
-        HouseID    int    `json:"house_id"`
         SensorID   int    `json:"sensor_id"`
         SensorType string `json:"sensor_type"`
         Message    string `json:"message"`
@@ -33,7 +32,7 @@ func (c *CreateNotificationController) CreateNotification(ctx *gin.Context) {
         return
     }
 
-    notification, err := c.useCase.CreateNotification(request.HouseID, request.SensorID, request.SensorType, request.Message)
+    notification, err := c.useCase.CreateNotification(request.SensorID, request.SensorType, request.Message)
     if err != nil {
         if err.Error() == "invalid sensorType: must be one of 'GasSensor', 'MotionSensor', 'DoorSensor', 'WindowSensor', or 'LedControl'" {
             ctx.JSON(http.StatusBadRequest, gin.H{

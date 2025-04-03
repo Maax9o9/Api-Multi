@@ -9,12 +9,17 @@ import (
 )
 
 type AddHouseController struct {
-    addHouseUseCase *application.AddHouseUseCase
+    imageHandlerUseCase    *application.ImageHandlerUseCase
+    locationHandlerUseCase *application.LocationHandlerUseCase
 }
 
-func NewAddHouseController(addHouseUseCase *application.AddHouseUseCase) *AddHouseController {
+func NewAddHouseController(
+    imageHandlerUseCase *application.ImageHandlerUseCase,
+    locationHandlerUseCase *application.LocationHandlerUseCase,
+) *AddHouseController {
     return &AddHouseController{
-        addHouseUseCase: addHouseUseCase,
+        imageHandlerUseCase:    imageHandlerUseCase,
+        locationHandlerUseCase: locationHandlerUseCase,
     }
 }
 
@@ -38,8 +43,15 @@ func (ac *AddHouseController) AddHouse(c *gin.Context) {
     }
     defer src.Close()
 
-    if err := ac.addHouseUseCase.AddHouse(&house, file.Filename, src); err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al agregar la casa", "details": err.Error()})
+    imagePath, err := ac.imageHandlerUseCase.SaveImage(file.Filename, src)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al guardar la imagen", "details": err.Error()})
+        return
+    }
+    house.Image = imagePath
+
+    if err := ac.locationHandlerUseCase.SaveHouseLocation(&house); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al guardar la ubicación de la casa", "details": err.Error()})
         return
     }
 

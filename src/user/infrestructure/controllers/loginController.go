@@ -6,6 +6,7 @@ import (
     "net/http"
 
     "github.com/gin-gonic/gin"
+    "golang.org/x/crypto/bcrypt"
 )
 
 type LoginController struct {
@@ -30,7 +31,12 @@ func (lc *LoginController) Login(c *gin.Context) {
     }
 
     user, err := lc.userRepo.GetByUsername(credentials.Username)
-    if err != nil || user.Password != credentials.Password {
+    if err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Credenciales inválidas"})
+        return
+    }
+
+    if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(credentials.Password)); err != nil {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "Credenciales inválidas"})
         return
     }

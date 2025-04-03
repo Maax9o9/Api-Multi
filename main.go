@@ -8,17 +8,17 @@ import (
     infresUser "Multi/src/user/infrestructure"
     routesUser "Multi/src/user/infrestructure/routes"
     infresWeather "Multi/src/weather"
-    weatherControllers "Multi/src/weather/infrestructure/controllers"
     routesWeather "Multi/src/weather/infrestructure/routes"
+    controllerWeather "Multi/src/weather/infrestructure/controllers"
     infresLight "Multi/src/interruptors/light/infrestructure"
     routesLight "Multi/src/interruptors/light/infrestructure/routes"
-    lightControllers "Multi/src/interruptors/light/infrestructure/controllers"
+    controllerLight "Multi/src/interruptors/light/infrestructure/controllers"
     infresMovement "Multi/src/interruptors/movement/infrestructure"
     routesMovement "Multi/src/interruptors/movement/infrestructure/routes"
     controllerMovement "Multi/src/interruptors/movement/infrestructure/controllers"
     infresDoor "Multi/src/interruptors/door/infrestructure"
     routesDoor "Multi/src/interruptors/door/infrestructure/routes"
-    controllerDoor "Multi/src/interruptors/door/infrestructure/controllers"
+    controllersDoor "Multi/src/interruptors/door/infrestructure/controllers"
     infresWindow "Multi/src/interruptors/window/infrestructure"
     routesWindow "Multi/src/interruptors/window/infrestructure/routes"
     controllerWindow "Multi/src/interruptors/window/infrestructure/controllers"
@@ -30,14 +30,15 @@ import (
     "github.com/gin-contrib/cors"
     "github.com/gin-gonic/gin"
 )
- 
+
 func main() {
     router := gin.Default()
     router.Use(cors.Default())
 
-    weatherService, rabbitMQWeather := infresWeather.InitWeather()
-    weatherController := weatherControllers.NewWeatherController(weatherService)
-    routesWeather.WeatherRoutes(router, weatherController)
+    alertWeatherService, receiveWeatherService, rabbitMQWeather := infresWeather.InitWeather()
+    alertWeatherController := controllerWeather.NewAlertWeatherController(alertWeatherService)
+    receiveWeatherController := controllerWeather.NewReceiveWeatherController(receiveWeatherService)
+    routesWeather.WeatherRoutes(router, alertWeatherController, receiveWeatherController)
 
     createUserController, showUserController, loginController := infresUser.InitUser()
     routesUser.UserRoutes(router, createUserController, showUserController, loginController)
@@ -48,34 +49,37 @@ func main() {
     createNotificationController, showNotificationController := infresNotification.InitNotification()
     routesNotification.NotificationRoutes(router, createNotificationController, showNotificationController)
 
-    lightService, rabbitMQLight := infresLight.InitLight()
-    lightController := lightControllers.NewLightController(lightService)
-    routesLight.LightRoutes(router, lightController)
+    alertLightService, receiveLightService, rabbitMQLight := infresLight.InitLight()
+    alertLightController := controllerLight.NewAlertLightController(alertLightService)
+    receiveLightController := controllerLight.NewReceiveLightController(receiveLightService)
+    routesLight.LightRoutes(router, alertLightController, receiveLightController)
 
-    movementService, rabbitMQMovement := infresMovement.InitMovement()
-    movementController := controllerMovement.NewMovementController(movementService)
-    routesMovement.MovementRoutes(router, movementController)
+    alertMovementService, receiveMovementService, rabbitMQMovement := infresMovement.InitMovement()
+    alertMovementController := controllerMovement.NewAlertMovementController(alertMovementService)
+    receiveMovementController := controllerMovement.NewReceiveMovementController(receiveMovementService)
+    routesMovement.MovementRoutes(router, alertMovementController, receiveMovementController)
 
-    doorService, rabbitMQDoor := infresDoor.InitDoor()
-    doorController := controllerDoor.NewDoorController(doorService)
-    routesDoor.DoorRoutes(router, doorController)
+    alertDoorService, receiveDoorService, rabbitMQDoor := infresDoor.InitDoor()
+    alertDoorController := controllersDoor.NewAlertDoorController(alertDoorService)
+    receiveDoorController := controllersDoor.NewReceiveDoorController(receiveDoorService)
+    routesDoor.DoorRoutes(router, alertDoorController, receiveDoorController)
 
-    windowService, rabbitMQWindow := infresWindow.InitWindow()
-    windowController := controllerWindow.NewWindowController(windowService)
-    routesWindow.WindowRoutes(router, windowController)
+    alertWindowService, receiveWindowService, rabbitMQWindow := infresWindow.InitWindow()
+    alertWindowController := controllerWindow.NewAlertWindowController(alertWindowService)
+    receiveWindowController := controllerWindow.NewReceiveWindowController(receiveWindowService)
+    routesWindow.WindowRoutes(router, alertWindowController, receiveWindowController)
 
-    gasService, rabbitMQGas := infresGas.InitGas()
-    gasController := controllerGas.NewGasController(gasService)
-    routesGas.GasRoutes(router, gasController)
+    alertGasService, receiveGasService, rabbitMQGas := infresGas.InitGas()
+    alertGasController := controllerGas.NewAlertGasController(alertGasService)
+    receiveGasController := controllerGas.NewReceiveGasController(receiveGasService)
+    routesGas.GasRoutes(router, alertGasController, receiveGasController)
 
     defer rabbitMQWeather.Close()
     defer rabbitMQGas.Close()
     defer rabbitMQMovement.Close()
     defer rabbitMQLight.Close()
-    defer rabbitMQMovement.Close()
     defer rabbitMQDoor.Close()
     defer rabbitMQWindow.Close()
-    defer rabbitMQGas.Close()
 
     if err := router.Run(":8080"); err != nil {
         log.Fatalf("Failed to run server: %v", err)

@@ -8,12 +8,13 @@ import (
     "log"
 )
 
-func InitDoor() (*service.DoorService, *adapters.RabbitConsumer) {
+func InitDoor() (*service.AlertDoorService, *service.ReceiveDoorService, *adapters.RabbitConsumer) {
+    // Inicializar RabbitMQ
     rabbitMQ, err := adapters.NewRabbitConsumer(
         "amqp://uriel:eduardo117@3.228.81.226:5672/",
-        "amq.topic",                         
-        "puerta",                            
-        "sensor.puerta",                       
+        "amq.topic",    // Exchange
+        "puerta",       // Queue
+        "sensor.puerta", // Routing Key
     )
     if err != nil {
         log.Fatalf("Failed to initialize RabbitMQ: %v", err)
@@ -22,9 +23,11 @@ func InitDoor() (*service.DoorService, *adapters.RabbitConsumer) {
     rabbitRepo := repositorys.NewRabbitRepository(rabbitMQ)
     doorRepo := NewPostgres()
 
-    doorUseCase := application.NewDoorUseCase(doorRepo, rabbitRepo)
+    alertDoorUseCase := application.NewAlertDoorUseCase(doorRepo, rabbitRepo)
+    receiveDoorUseCase := application.NewReceiveDoorUseCase(doorRepo)
 
-    doorService := service.NewDoorService(doorUseCase)
+    alertDoorService := service.NewAlertDoorService(alertDoorUseCase)
+    receiveDoorService := service.NewReceiveDoorService(receiveDoorUseCase)
 
-    return doorService, rabbitMQ
+    return alertDoorService, receiveDoorService, rabbitMQ
 }

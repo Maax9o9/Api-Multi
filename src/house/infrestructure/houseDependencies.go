@@ -8,11 +8,14 @@ import (
 func InitHouse() (*controllers.AddHouseController, *controllers.ShowHouseController, *controllers.EditHouseController) {
     houseRepo := NewPostgres()
 
-    addHouseUseCase := application.NewAddHouseUseCase(houseRepo)
+    imageHandlerUseCase := application.NewImageHandlerUseCase()
+    locationHandlerUseCase := application.NewLocationHandlerUseCase(houseRepo)
+
+    addHouseController := controllers.NewAddHouseController(imageHandlerUseCase, locationHandlerUseCase)
+
     showHouseUseCase := application.NewShowHouseUseCase(houseRepo)
     editHouseUseCase := application.NewEditHouseUseCase(houseRepo)
 
-    addHouseController := controllers.NewAddHouseController(addHouseUseCase)
     showHouseController := controllers.NewShowHouseController(showHouseUseCase)
     editHouseController := controllers.NewEditHouseController(editHouseUseCase)
 

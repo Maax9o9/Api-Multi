@@ -8,31 +8,23 @@ import (
     "log"
 )
 
-type GasUseCase struct {
+type AlertGasUseCase struct {
     repo       domain.GasRepository
     rabbitRepo *repositorys.RabbitRepository
 }
 
-func NewGasUseCase(repo domain.GasRepository, rabbitRepo *repositorys.RabbitRepository) *GasUseCase {
-    return &GasUseCase{
+func NewAlertGasUseCase(repo domain.GasRepository, rabbitRepo *repositorys.RabbitRepository) *AlertGasUseCase {
+    return &AlertGasUseCase{
         repo:       repo,
         rabbitRepo: rabbitRepo,
     }
 }
 
-func (uc *GasUseCase) GetAllGasData() ([]entities.GasSensor, error) {
-    return uc.repo.GetAll()
-}
-
-func (uc *GasUseCase) GetGasDataByID(id int) (*entities.GasSensor, error) {
-    return uc.repo.GetByID(id)
-}
-
-func (uc *GasUseCase) CreateGasData(data *entities.GasSensor) error {
+func (uc *AlertGasUseCase) CreateGasData(data *entities.GasSensor) error {
     return uc.repo.Create(data)
 }
 
-func (uc *GasUseCase) ProcessGasData(message []byte) error {
+func (uc *AlertGasUseCase) ProcessGasData(message []byte) error {
     var gasData entities.GasSensor
     err := json.Unmarshal(message, &gasData)
     if err != nil {

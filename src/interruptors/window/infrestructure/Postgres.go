@@ -21,8 +21,8 @@ func NewPostgres() domain.WindowRepository {
 }
 
 func (pg *Postgres) Create(data *entities.WindowSensor) error {
-    query := "INSERT INTO WindowSensor (house_id, createdAt, status) VALUES ($1, $2, $3)"
-    _, err := pg.conn.ExecutePreparedQuery(query, data.HouseID, data.CreatedAt, data.Status)
+    query := "INSERT INTO WindowSensor (createdAt, status) VALUES ($1, $2)"
+    _, err := pg.conn.ExecutePreparedQuery(query, data.CreatedAt, data.Status)
     if err != nil {
         log.Printf("Error al insertar datos de ventana: %v", err)
         return err
@@ -31,7 +31,7 @@ func (pg *Postgres) Create(data *entities.WindowSensor) error {
 }
 
 func (pg *Postgres) GetAll() ([]entities.WindowSensor, error) {
-    query := "SELECT id, house_id, createdAt, status FROM WindowSensor"
+    query := "SELECT id, createdAt, status FROM WindowSensor"
     rows := pg.conn.FetchRows(query)
     defer rows.Close()
 
@@ -39,7 +39,7 @@ func (pg *Postgres) GetAll() ([]entities.WindowSensor, error) {
 
     for rows.Next() {
         var data entities.WindowSensor
-        if err := rows.Scan(&data.ID, &data.HouseID, &data.CreatedAt, &data.Status); err != nil {
+        if err := rows.Scan(&data.ID, &data.CreatedAt, &data.Status); err != nil {
             log.Printf("Error al escanear datos de ventana: %v", err)
             return nil, err
         }
@@ -54,13 +54,13 @@ func (pg *Postgres) GetAll() ([]entities.WindowSensor, error) {
 }
 
 func (pg *Postgres) GetByID(id int) (*entities.WindowSensor, error) {
-    query := "SELECT id, house_id, createdAt, status FROM WindowSensor WHERE id = $1"
+    query := "SELECT id, createdAt, status FROM WindowSensor WHERE id = $1"
     rows := pg.conn.FetchRows(query, id)
     defer rows.Close()
 
     var data entities.WindowSensor
     if rows.Next() {
-        if err := rows.Scan(&data.ID, &data.HouseID, &data.CreatedAt, &data.Status); err != nil {
+        if err := rows.Scan(&data.ID, &data.CreatedAt, &data.Status); err != nil {
             log.Printf("Error al escanear datos de ventana: %v", err)
             return nil, err
         }

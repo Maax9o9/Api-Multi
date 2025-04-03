@@ -21,8 +21,8 @@ func NewPostgres() domain.MovementRepository {
 }
 
 func (pg *Postgres) Create(data *entities.MotionSensor) error {
-    query := "INSERT INTO MotionSensor (house_id, createdAt, status) VALUES ($1, $2, $3)"
-    _, err := pg.conn.ExecutePreparedQuery(query, data.HouseID, data.CreatedAt, data.Status)
+    query := "INSERT INTO MotionSensor (createdAt, status) VALUES ($1, $2)"
+    _, err := pg.conn.ExecutePreparedQuery(query, data.CreatedAt, data.Status)
     if err != nil {
         log.Printf("Error al insertar datos de movimiento: %v", err)
         return err
@@ -31,7 +31,7 @@ func (pg *Postgres) Create(data *entities.MotionSensor) error {
 }
 
 func (pg *Postgres) GetAll() ([]entities.MotionSensor, error) {
-    query := "SELECT id, house_id, createdAt, status FROM MotionSensor"
+    query := "SELECT id, createdAt, status FROM MotionSensor"
     rows := pg.conn.FetchRows(query)
     defer rows.Close()
 
@@ -39,7 +39,7 @@ func (pg *Postgres) GetAll() ([]entities.MotionSensor, error) {
 
     for rows.Next() {
         var data entities.MotionSensor
-        if err := rows.Scan(&data.ID, &data.HouseID, &data.CreatedAt, &data.Status); err != nil {
+        if err := rows.Scan(&data.ID, &data.CreatedAt, &data.Status); err != nil {
             log.Printf("Error al escanear datos de movimiento: %v", err)
             return nil, err
         }
@@ -54,13 +54,13 @@ func (pg *Postgres) GetAll() ([]entities.MotionSensor, error) {
 }
 
 func (pg *Postgres) GetByID(id int) (*entities.MotionSensor, error) {
-    query := "SELECT id, house_id, createdAt, status FROM MotionSensor WHERE id = $1"
+    query := "SELECT id, createdAt, status FROM MotionSensor WHERE id = $1"
     rows := pg.conn.FetchRows(query, id)
     defer rows.Close()
 
     var data entities.MotionSensor
     if rows.Next() {
-        if err := rows.Scan(&data.ID, &data.HouseID, &data.CreatedAt, &data.Status); err != nil {
+        if err := rows.Scan(&data.ID, &data.CreatedAt, &data.Status); err != nil {
             log.Printf("Error al escanear datos de movimiento: %v", err)
             return nil, err
         }

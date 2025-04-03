@@ -8,12 +8,12 @@ import (
     "log"
 )
 
-func InitGas() (*service.GasService, *adapters.RabbitConsumer) {
+func InitGas() (*service.AlertGasService, *service.ReceiveGasService, *adapters.RabbitConsumer) {
     rabbitMQ, err := adapters.NewRabbitConsumer(
         "amqp://uriel:eduardo117@3.228.81.226:5672/",
-        "amq.topic",                         
-        "gas",                            
-        "sensor.mq2",                        
+        "amq.topic",    // Exchange
+        "gas",          // Queue
+        "sensor.mq2",   // Routing Key
     )
     if err != nil {
         log.Fatalf("Failed to initialize RabbitMQ: %v", err)
@@ -22,9 +22,11 @@ func InitGas() (*service.GasService, *adapters.RabbitConsumer) {
     rabbitRepo := repositorys.NewRabbitRepository(rabbitMQ)
     gasRepo := NewPostgres()
 
-    gasUseCase := application.NewGasUseCase(gasRepo, rabbitRepo)
+    alertGasUseCase := application.NewAlertGasUseCase(gasRepo, rabbitRepo)
+    receiveGasUseCase := application.NewReceiveGasUseCase(gasRepo)
 
-    gasService := service.NewGasService(gasUseCase)
+    alertGasService := service.NewAlertGasService(alertGasUseCase)
+    receiveGasService := service.NewReceiveGasService(receiveGasUseCase)
 
-    return gasService, rabbitMQ
+    return alertGasService, receiveGasService, rabbitMQ
 }

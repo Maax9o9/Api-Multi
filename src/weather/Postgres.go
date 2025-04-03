@@ -21,8 +21,8 @@ func NewPostgres() domain.WeatherRepository {
 }
 
 func (pg *Postgres) Create(data *entities.SensorDataWeather) error {
-    query := "INSERT INTO weather_data (house_id, date, heat, damp) VALUES ($1, $2, $3, $4)"
-    _, err := pg.conn.ExecutePreparedQuery(query, data.HouseID, data.Date, data.Heat, data.Damp)
+    query := "INSERT INTO sensorDataWeather (date, heat, damp) VALUES ($1, $2, $3)"
+    _, err := pg.conn.ExecutePreparedQuery(query, data.Date, data.Heat, data.Damp)
     if err != nil {
         log.Printf("Error al insertar datos meteorológicos: %v", err)
         return err
@@ -31,7 +31,7 @@ func (pg *Postgres) Create(data *entities.SensorDataWeather) error {
 }
 
 func (pg *Postgres) GetAll() ([]entities.SensorDataWeather, error) {
-    query := "SELECT weather_id, house_id, date, heat, damp FROM weather_data"
+    query := "SELECT weather_id, date, heat, damp FROM sensorDataWeather"
     rows := pg.conn.FetchRows(query)
     defer rows.Close()
 
@@ -39,7 +39,7 @@ func (pg *Postgres) GetAll() ([]entities.SensorDataWeather, error) {
 
     for rows.Next() {
         var data entities.SensorDataWeather
-        if err := rows.Scan(&data.WeatherID, &data.HouseID, &data.Date, &data.Heat, &data.Damp); err != nil {
+        if err := rows.Scan(&data.WeatherID, &data.Date, &data.Heat, &data.Damp); err != nil {
             log.Printf("Error al escanear datos meteorológicos: %v", err)
             return nil, err
         }
@@ -54,13 +54,13 @@ func (pg *Postgres) GetAll() ([]entities.SensorDataWeather, error) {
 }
 
 func (pg *Postgres) GetByID(id int) (*entities.SensorDataWeather, error) {
-    query := "SELECT weather_id, house_id, date, heat, damp FROM weather_data WHERE weather_id = $1"
+    query := "SELECT weather_id, date, heat, damp FROM sensorDataWeather WHERE weather_id = $1"
     rows := pg.conn.FetchRows(query, id)
     defer rows.Close()
 
     var data entities.SensorDataWeather
     if rows.Next() {
-        if err := rows.Scan(&data.WeatherID, &data.HouseID, &data.Date, &data.Heat, &data.Damp); err != nil {
+        if err := rows.Scan(&data.WeatherID, &data.Date, &data.Heat, &data.Damp); err != nil {
             log.Printf("Error al escanear datos meteorológicos: %v", err)
             return nil, err
         }

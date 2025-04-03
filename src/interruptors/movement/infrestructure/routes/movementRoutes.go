@@ -5,8 +5,12 @@ import (
     "github.com/gin-gonic/gin"
 )
 
-func MovementRoutes(router *gin.Engine, controller *controllers.MovementController) {
-    router.POST("/api/movement", controller.CreateMovementData)
-    router.GET("/api/movement", controller.GetAllMovementData)
-    router.GET("/api/movement/:id", controller.GetMovementDataByID)
+func MovementRoutes(
+    router *gin.Engine,
+    alertController *controllers.AlertMovementController,
+    receiveController *controllers.ReceiveMovementController,
+) {
+    router.POST("/api/movement", alertController.CreateMovementData)
+    router.GET("/api/movement", receiveController.GetAllMovementData)
+    router.GET("/api/movement/:id", receiveController.GetMovementDataByID)
 }

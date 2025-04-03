@@ -8,31 +8,23 @@ import (
     "log"
 )
 
-type LightUseCase struct {
+type AlertLightUseCase struct {
     repo       domain.LightRepository
     rabbitRepo *repositorys.RabbitRepository
 }
 
-func NewLightUseCase(repo domain.LightRepository, rabbitRepo *repositorys.RabbitRepository) *LightUseCase {
-    return &LightUseCase{
+func NewAlertLightUseCase(repo domain.LightRepository, rabbitRepo *repositorys.RabbitRepository) *AlertLightUseCase {
+    return &AlertLightUseCase{
         repo:       repo,
         rabbitRepo: rabbitRepo,
     }
 }
 
-func (uc *LightUseCase) GetAllLightData() ([]entities.LightData, error) {
-    return uc.repo.GetAll()
-}
-
-func (uc *LightUseCase) GetLightDataByID(id int) (*entities.LightData, error) {
-    return uc.repo.GetByID(id)
-}
-
-func (uc *LightUseCase) CreateLightData(data *entities.LightData) error {
+func (uc *AlertLightUseCase) CreateLightData(data *entities.LightData) error {
     return uc.repo.Create(data)
 }
 
-func (uc *LightUseCase) ProcessLightData(message []byte) error {
+func (uc *AlertLightUseCase) ProcessLightData(message []byte) error {
     var lightData entities.LightData
     err := json.Unmarshal(message, &lightData)
     if err != nil {
@@ -50,6 +42,6 @@ func (uc *LightUseCase) ProcessLightData(message []byte) error {
     return nil
 }
 
-func (uc *LightUseCase) ProcessLightCommands(processMessage func(body []byte)) error {
+func (uc *AlertLightUseCase) ProcessLightCommands(processMessage func(body []byte)) error {
     return uc.rabbitRepo.ProcessLightCommands(processMessage)
 }

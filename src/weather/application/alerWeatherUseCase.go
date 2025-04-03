@@ -8,31 +8,23 @@ import (
     "log"
 )
 
-type WeatherUseCase struct {
+type AlertWeatherUseCase struct {
     repo       domain.WeatherRepository
     rabbitRepo *repositorys.RabbitRepository
 }
 
-func NewWeatherUseCase(repo domain.WeatherRepository, rabbitRepo *repositorys.RabbitRepository) *WeatherUseCase {
-    return &WeatherUseCase{
+func NewAlertWeatherUseCase(repo domain.WeatherRepository, rabbitRepo *repositorys.RabbitRepository) *AlertWeatherUseCase {
+    return &AlertWeatherUseCase{
         repo:       repo,
         rabbitRepo: rabbitRepo,
     }
 }
 
-func (uc *WeatherUseCase) GetAllWeatherData() ([]entities.SensorDataWeather, error) {
-    return uc.repo.GetAll()
-}
-
-func (uc *WeatherUseCase) GetWeatherDataByID(id int) (*entities.SensorDataWeather, error) {
-    return uc.repo.GetByID(id)
-}
-
-func (uc *WeatherUseCase) CreateWeatherData(data *entities.SensorDataWeather) error {
+func (uc *AlertWeatherUseCase) CreateWeatherData(data *entities.SensorDataWeather) error {
     return uc.repo.Create(data)
 }
 
-func (uc *WeatherUseCase) ProcessWeatherData(message []byte) error {
+func (uc *AlertWeatherUseCase) ProcessWeatherData(message []byte) error {
     var weatherData entities.SensorDataWeather
     err := json.Unmarshal(message, &weatherData)
     if err != nil {

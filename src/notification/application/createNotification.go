@@ -17,7 +17,7 @@ func NewCreateNotificationUseCase(repo domain.NotificationRepository) *CreateNot
     }
 }
 
-func (uc *CreateNotificationUseCase) CreateNotification(houseID int, sensorID int, sensorType string, message string) (*entities.Notification, error) {
+func (uc *CreateNotificationUseCase) CreateNotification(sensorID int, sensorType string, message string) (*entities.Notification, error) {
     validSensorTypes := map[string]bool{
         "GasSensor":     true,
         "MotionSensor":  true,
@@ -30,7 +30,6 @@ func (uc *CreateNotificationUseCase) CreateNotification(houseID int, sensorID in
     }
 
     notification := &entities.Notification{
-        HouseID:    houseID,
         SensorID:   sensorID,
         SensorType: sensorType,
         Date:       time.Now(),

@@ -5,8 +5,12 @@ import (
     "github.com/gin-gonic/gin"
 )
 
-func GasRoutes(router *gin.Engine, controller *controllers.GasController) {
-    router.GET("/api/gas", controller.GetAllGasData)
-    router.GET("/api/gas/:id", controller.GetGasDataByID)
-    router.POST("/api/gas", controller.CreateGasData)
+func GasRoutes(
+    router *gin.Engine,
+    alertController *controllers.AlertGasController,
+    receiveController *controllers.ReceiveGasController,
+) {
+    router.GET("/api/gas", receiveController.GetAllGasData)
+    router.GET("/api/gas/:id", receiveController.GetGasDataByID)
+    router.POST("/api/gas", alertController.CreateGasData)
 }

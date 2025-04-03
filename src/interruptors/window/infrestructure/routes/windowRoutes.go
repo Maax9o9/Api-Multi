@@ -5,8 +5,13 @@ import (
     "github.com/gin-gonic/gin"
 )
 
-func WindowRoutes(router *gin.Engine, controller *controllers.WindowController) {
-    router.GET("/api/window", controller.GetAllWindowData)
-    router.GET("/api/window/:id", controller.GetWindowDataByID)
-    router.POST("/api/window", controller.CreateWindowData)
+func WindowRoutes(
+    router *gin.Engine,
+    alertController *controllers.AlertWindowController,
+    receiveController *controllers.ReceiveWindowController,
+) {
+    router.GET("/api/window", receiveController.GetAllWindowData)
+    router.GET("/api/window/:id", receiveController.GetWindowDataByID)
+
+    router.POST("/api/window", alertController.CreateWindowData)
 }

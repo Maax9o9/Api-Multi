@@ -8,31 +8,23 @@ import (
     "log"
 )
 
-type WindowUseCase struct {
+type AlertWindowUseCase struct {
     repo       domain.WindowRepository
     rabbitRepo *repositorys.RabbitRepository
 }
 
-func NewWindowUseCase(repo domain.WindowRepository, rabbitRepo *repositorys.RabbitRepository) *WindowUseCase {
-    return &WindowUseCase{
+func NewAlertWindowUseCase(repo domain.WindowRepository, rabbitRepo *repositorys.RabbitRepository) *AlertWindowUseCase {
+    return &AlertWindowUseCase{
         repo:       repo,
         rabbitRepo: rabbitRepo,
     }
 }
 
-func (uc *WindowUseCase) GetAllWindowData() ([]entities.WindowSensor, error) {
-    return uc.repo.GetAll()
-}
-
-func (uc *WindowUseCase) GetWindowDataByID(id int) (*entities.WindowSensor, error) {
-    return uc.repo.GetByID(id)
-}
-
-func (uc *WindowUseCase) CreateWindowData(data *entities.WindowSensor) error {
+func (uc *AlertWindowUseCase) CreateWindowData(data *entities.WindowSensor) error {
     return uc.repo.Create(data)
 }
 
-func (uc *WindowUseCase) ProcessWindowData(message []byte) error {
+func (uc *AlertWindowUseCase) ProcessWindowData(message []byte) error {
     var windowData entities.WindowSensor
     err := json.Unmarshal(message, &windowData)
     if err != nil {

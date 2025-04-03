@@ -5,8 +5,12 @@ import (
     "github.com/gin-gonic/gin"
 )
 
-func DoorRoutes(router *gin.Engine, controller *controllers.DoorController) {
-    router.POST("/api/door", controller.CreateDoorData)
-    router.GET("/api/door", controller.GetAllDoorData)
-    router.GET("/api/door/:id", controller.GetDoorDataByID)
+func DoorRoutes(
+    router *gin.Engine,
+    alertController *controllers.AlertDoorController,
+    receiveController *controllers.ReceiveDoorController,
+) {
+    router.POST("/api/door", alertController.CreateDoorData)
+    router.GET("/api/door", receiveController.GetAllDoorData)
+    router.GET("/api/door/:id", receiveController.GetDoorDataByID)
 }

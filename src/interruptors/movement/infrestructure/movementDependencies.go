@@ -8,12 +8,13 @@ import (
     "log"
 )
 
-func InitMovement() (*service.MovementService, *adapters.RabbitConsumer) {
+func InitMovement() (*service.AlertMovementService, *service.ReceiveMovementService, *adapters.RabbitConsumer) {
+    // Inicializar RabbitMQ
     rabbitMQ, err := adapters.NewRabbitConsumer(
         "amqp://uriel:eduardo117@3.228.81.226:5672/",
-        "amq.topic",                     
-        "movimiento",                       
-        "sensor.pir",                   
+        "amq.topic",    // Exchange
+        "movimiento",   // Queue
+        "sensor.pir",   // Routing Key
     )
     if err != nil {
         log.Fatalf("Failed to initialize RabbitMQ: %v", err)
@@ -22,9 +23,11 @@ func InitMovement() (*service.MovementService, *adapters.RabbitConsumer) {
     rabbitRepo := repositorys.NewRabbitRepository(rabbitMQ)
     movementRepo := NewPostgres()
 
-    movementUseCase := application.NewMovementUseCase(movementRepo, rabbitRepo)
+    alertMovementUseCase := application.NewAlertMovementUseCase(movementRepo, rabbitRepo)
+    receiveMovementUseCase := application.NewReceiveMovementUseCase(movementRepo)
 
-    movementService := service.NewMovementService(movementUseCase)
+    alertMovementService := service.NewAlertMovementService(alertMovementUseCase)
+    receiveMovementService := service.NewReceiveMovementService(receiveMovementUseCase)
 
-    return movementService, rabbitMQ
+    return alertMovementService, receiveMovementService, rabbitMQ
 }

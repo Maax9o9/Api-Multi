@@ -8,12 +8,12 @@ import (
     "log"
 )
 
-func InitWeather() (*service.WeatherService, *adapters.RabbitConsumer) {
+func InitWeather() (*service.AlertWeatherService, *service.ReceiveWeatherService, *adapters.RabbitConsumer) {
     rabbitMQ, err := adapters.NewRabbitConsumer(
         "amqp://uriel:eduardo117@3.228.81.226:5672/",
-        "amq.topic",
-        "temp.damp",
-        "sensor.dht11",
+        "amq.topic",    // Exchange
+        "temp.damp",    // Queue
+        "sensor.dht11", // Routing Key
     )
     if err != nil {
         log.Fatalf("Failed to initialize RabbitMQ: %v", err)
@@ -22,9 +22,11 @@ func InitWeather() (*service.WeatherService, *adapters.RabbitConsumer) {
     rabbitRepo := repositorys.NewRabbitRepository(rabbitMQ)
     weatherRepo := NewPostgres()
 
-    weatherUseCase := application.NewWeatherUseCase(weatherRepo, rabbitRepo)
+    alertWeatherUseCase := application.NewAlertWeatherUseCase(weatherRepo, rabbitRepo)
+    receiveWeatherUseCase := application.NewReceiveWeatherUseCase(weatherRepo)
 
-    weatherService := service.NewWeatherService(weatherUseCase)
+    alertWeatherService := service.NewAlertWeatherService(alertWeatherUseCase)
+    receiveWeatherService := service.NewReceiveWeatherService(receiveWeatherUseCase)
 
-    return weatherService, rabbitMQ
+    return alertWeatherService, receiveWeatherService, rabbitMQ
 }

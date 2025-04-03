@@ -8,31 +8,23 @@ import (
     "log"
 )
 
-type MovementUseCase struct {
+type AlertMovementUseCase struct {
     repo       domain.MovementRepository
     rabbitRepo *repositorys.RabbitRepository
 }
 
-func NewMovementUseCase(repo domain.MovementRepository, rabbitRepo *repositorys.RabbitRepository) *MovementUseCase {
-    return &MovementUseCase{
+func NewAlertMovementUseCase(repo domain.MovementRepository, rabbitRepo *repositorys.RabbitRepository) *AlertMovementUseCase {
+    return &AlertMovementUseCase{
         repo:       repo,
         rabbitRepo: rabbitRepo,
     }
 }
 
-func (uc *MovementUseCase) GetAll() ([]entities.MotionSensor, error) {
-    return uc.repo.GetAll()
-}
-
-func (uc *MovementUseCase) GetByID(id int) (*entities.MotionSensor, error) {
-    return uc.repo.GetByID(id)
-}
-
-func (uc *MovementUseCase) Create(data *entities.MotionSensor) error {
+func (uc *AlertMovementUseCase) Create(data *entities.MotionSensor) error {
     return uc.repo.Create(data)
 }
 
-func (uc *MovementUseCase) ProcessMovementData(message []byte) error {
+func (uc *AlertMovementUseCase) ProcessMovementData(message []byte) error {
     var motionData entities.MotionSensor
     err := json.Unmarshal(message, &motionData)
     if err != nil {

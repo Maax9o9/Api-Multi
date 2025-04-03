@@ -8,31 +8,23 @@ import (
     "log"
 )
 
-type DoorUseCase struct {
+type AlertDoorUseCase struct {
     repo       domain.DoorRepository
     rabbitRepo *repositorys.RabbitRepository
 }
 
-func NewDoorUseCase(repo domain.DoorRepository, rabbitRepo *repositorys.RabbitRepository) *DoorUseCase {
-    return &DoorUseCase{
+func NewAlertDoorUseCase(repo domain.DoorRepository, rabbitRepo *repositorys.RabbitRepository) *AlertDoorUseCase {
+    return &AlertDoorUseCase{
         repo:       repo,
         rabbitRepo: rabbitRepo,
     }
 }
 
-func (uc *DoorUseCase) GetAll() ([]entities.DoorData, error) {
-    return uc.repo.GetAll()
-}
-
-func (uc *DoorUseCase) GetByID(id int) (*entities.DoorData, error) {
-    return uc.repo.GetByID(id)
-}
-
-func (uc *DoorUseCase) Create(data *entities.DoorData) error {
+func (uc *AlertDoorUseCase) Create(data *entities.DoorData) error {
     return uc.repo.Create(data)
 }
 
-func (uc *DoorUseCase) ProcessDoorData(message []byte) error {
+func (uc *AlertDoorUseCase) ProcessDoorData(message []byte) error {
     var doorData entities.DoorData
     err := json.Unmarshal(message, &doorData)
     if err != nil {

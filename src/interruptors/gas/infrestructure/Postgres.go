@@ -21,8 +21,8 @@ func NewPostgres() domain.GasRepository {
 }
 
 func (pg *Postgres) Create(data *entities.GasSensor) error {
-    query := "INSERT INTO GasSensor (house_id, createdAt, status, gasLevel) VALUES ($1, $2, $3, $4)"
-    _, err := pg.conn.ExecutePreparedQuery(query, data.HouseID, data.CreatedAt, data.Status, data.GasLevel)
+    query := "INSERT INTO GasSensor (createdAt, status, gasLevel) VALUES ($1, $2, $3)"
+    _, err := pg.conn.ExecutePreparedQuery(query, data.CreatedAt, data.Status, data.GasLevel)
     if err != nil {
         log.Printf("Error al insertar datos de gas: %v", err)
         return err
@@ -31,7 +31,7 @@ func (pg *Postgres) Create(data *entities.GasSensor) error {
 }
 
 func (pg *Postgres) GetAll() ([]entities.GasSensor, error) {
-    query := "SELECT id, house_id, createdAt, status, gasLevel FROM GasSensor"
+    query := "SELECT id, createdAt, status, gasLevel FROM GasSensor"
     rows := pg.conn.FetchRows(query)
     defer rows.Close()
 
@@ -39,7 +39,7 @@ func (pg *Postgres) GetAll() ([]entities.GasSensor, error) {
 
     for rows.Next() {
         var data entities.GasSensor
-        if err := rows.Scan(&data.ID, &data.HouseID, &data.CreatedAt, &data.Status, &data.GasLevel); err != nil {
+        if err := rows.Scan(&data.ID, &data.CreatedAt, &data.Status, &data.GasLevel); err != nil {
             log.Printf("Error al escanear datos de gas: %v", err)
             return nil, err
         }
@@ -54,13 +54,13 @@ func (pg *Postgres) GetAll() ([]entities.GasSensor, error) {
 }
 
 func (pg *Postgres) GetByID(id int) (*entities.GasSensor, error) {
-    query := "SELECT id, house_id, createdAt, status, gasLevel FROM GasSensor WHERE id = $1"
+    query := "SELECT id, createdAt, status, gasLevel FROM GasSensor WHERE id = $1"
     rows := pg.conn.FetchRows(query, id)
     defer rows.Close()
 
     var data entities.GasSensor
     if rows.Next() {
-        if err := rows.Scan(&data.ID, &data.HouseID, &data.CreatedAt, &data.Status, &data.GasLevel); err != nil {
+        if err := rows.Scan(&data.ID, &data.CreatedAt, &data.Status, &data.GasLevel); err != nil {
             log.Printf("Error al escanear datos de gas: %v", err)
             return nil, err
         }

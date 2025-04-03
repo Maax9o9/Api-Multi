@@ -5,7 +5,12 @@ import (
     "github.com/gin-gonic/gin"
 )
 
-func WeatherRoutes(router *gin.Engine, weatherController *controllers.WeatherController) {
-    router.GET("/api/weather", weatherController.GetAllWeatherData)
-    router.GET("/api/weather/latest", weatherController.GetLatestWeatherData)
+func WeatherRoutes(
+    router *gin.Engine,
+    alertController *controllers.AlertWeatherController,
+    receiveController *controllers.ReceiveWeatherController,
+) {
+    router.GET("/api/weather", receiveController.GetAllWeatherData)
+    router.GET("/api/weather/latest", receiveController.GetLatestWeatherData)
+    router.POST("/api/weather", alertController.ProcessWeatherData)
 }
