@@ -10,8 +10,10 @@ import (
 
 func InitWindow() (*service.WindowService, *adapters.RabbitConsumer) {
     rabbitMQ, err := adapters.NewRabbitConsumer(
-        "amqp://user:password@localhost:5672/",
-        "WindowQueue",
+        "amqp://uriel:eduardo117@3.228.81.226:5672/",
+        "amq.topic",
+        "ventana",                          
+        "sensor.ventana",                     
     )
     if err != nil {
         log.Fatalf("Failed to initialize RabbitMQ: %v", err)

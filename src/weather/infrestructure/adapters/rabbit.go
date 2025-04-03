@@ -15,18 +15,20 @@ type RabbitConsumer struct {
 func NewRabbitConsumer(rabbitURL, exchangeName, queueName, routingKey string) (*RabbitConsumer, error) {
     conn, err := amqp.Dial(rabbitURL)
     if err != nil {
+        log.Printf("Error al conectar con RabbitMQ: %v", err)
         return nil, err
     }
 
     ch, err := conn.Channel()
     if err != nil {
         conn.Close()
+        log.Printf("Error al crear el canal de RabbitMQ: %v", err)
         return nil, err
     }
 
     err = ch.ExchangeDeclare(
         exchangeName, // name
-        "direct",     // type
+        "topic",     // type
         true,         // durable
         false,        // auto-deleted
         false,        // internal
@@ -36,6 +38,7 @@ func NewRabbitConsumer(rabbitURL, exchangeName, queueName, routingKey string) (*
     if err != nil {
         ch.Close()
         conn.Close()
+        log.Printf("Error al declarar el exchange: %v", err)
         return nil, err
     }
 
@@ -50,6 +53,7 @@ func NewRabbitConsumer(rabbitURL, exchangeName, queueName, routingKey string) (*
     if err != nil {
         ch.Close()
         conn.Close()
+        log.Printf("Error al declarar la cola: %v", err)
         return nil, err
     }
 
@@ -63,6 +67,7 @@ func NewRabbitConsumer(rabbitURL, exchangeName, queueName, routingKey string) (*
     if err != nil {
         ch.Close()
         conn.Close()
+        log.Printf("Error al enlazar la cola: %v", err)
         return nil, err
     }
 
@@ -84,13 +89,14 @@ func (r *RabbitConsumer) ConsumeMessages(processMessage func(body []byte)) error
         nil,         // args
     )
     if err != nil {
+        log.Printf("Error al consumir mensajes de RabbitMQ: %v", err)
         return err
     }
 
     go func() {
         for d := range msgs {
-            log.Printf("Received a message: %s", d.Body)
-            processMessage(d.Body)
+            log.Printf("Mensaje recibido: %s", d.Body)
+            processMessage(d.Body) // Procesar el mensaje
         }
     }()
 
@@ -98,6 +104,10 @@ func (r *RabbitConsumer) ConsumeMessages(processMessage func(body []byte)) error
 }
 
 func (r *RabbitConsumer) Close() {
-    r.Channel.Close()
-    r.Connection.Close()
+    if err := r.Channel.Close(); err != nil {
+        log.Printf("Error al cerrar el canal de RabbitMQ: %v", err)
+    }
+    if err := r.Connection.Close(); err != nil {
+        log.Printf("Error al cerrar la conexión de RabbitMQ: %v", err)
+    }
 }

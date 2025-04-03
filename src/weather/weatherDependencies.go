@@ -10,10 +10,10 @@ import (
 
 func InitWeather() (*service.WeatherService, *adapters.RabbitConsumer) {
     rabbitMQ, err := adapters.NewRabbitConsumer(
-        "amqp://max:123@44.213.165.25:5672/",
-        "PizzasExchange",
-        "PizzasQueue",
-        "pizza.order",
+        "amqp://uriel:eduardo117@3.228.81.226:5672/",
+        "amq.topic",
+        "temp.damp",
+        "sensor.dht11",
     )
     if err != nil {
         log.Fatalf("Failed to initialize RabbitMQ: %v", err)

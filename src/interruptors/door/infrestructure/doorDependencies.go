@@ -10,8 +10,10 @@ import (
 
 func InitDoor() (*service.DoorService, *adapters.RabbitConsumer) {
     rabbitMQ, err := adapters.NewRabbitConsumer(
-        "amqp://user:password@localhost:5672/",
-        "DoorQueue",
+        "amqp://uriel:eduardo117@3.228.81.226:5672/",
+        "amq.topic",                         
+        "puerta",                            
+        "sensor.puerta",                       
     )
     if err != nil {
         log.Fatalf("Failed to initialize RabbitMQ: %v", err)

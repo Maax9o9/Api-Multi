@@ -4,6 +4,8 @@ import (
     "Multi/src/interruptors/movement/domain"
     "Multi/src/interruptors/movement/domain/entities"
     "Multi/src/interruptors/movement/application/repositorys"
+    "encoding/json"
+    "log"
 )
 
 type MovementUseCase struct {
@@ -28,4 +30,22 @@ func (uc *MovementUseCase) GetByID(id int) (*entities.MotionSensor, error) {
 
 func (uc *MovementUseCase) Create(data *entities.MotionSensor) error {
     return uc.repo.Create(data)
+}
+
+func (uc *MovementUseCase) ProcessMovementData(message []byte) error {
+    var motionData entities.MotionSensor
+    err := json.Unmarshal(message, &motionData)
+    if err != nil {
+        log.Printf("Error unmarshalling movement data: %v", err)
+        return err
+    }
+
+    err = uc.Create(&motionData)
+    if err != nil {
+        log.Printf("Error saving movement data: %v", err)
+        return err
+    }
+
+    log.Printf("Movement data processed and saved: %+v", motionData)
+    return nil
 }

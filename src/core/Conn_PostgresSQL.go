@@ -23,7 +23,7 @@ var (
 
 func GetDBPool() *Conn_Postgres {
     once.Do(func() {
-        dsn := "user=max password= dbname=Domotica host=localhost port=5432 sslmode=disable"
+        dsn := "user=max dbname=Domotica host=localhost port=5432 sslmode=disable"
         db, err := sql.Open("postgres", dsn)
         if err != nil {
             log.Fatalf("Error al conectar con PostgreSQL: %v", err)
@@ -32,6 +32,8 @@ func GetDBPool() *Conn_Postgres {
         if err = db.Ping(); err != nil {
             log.Fatalf("Error al hacer ping a PostgreSQL: %v", err)
         }
+
+        log.Println("Conexión a PostgreSQL exitosa")
 
         instance = &Conn_Postgres{
             Db:  db,

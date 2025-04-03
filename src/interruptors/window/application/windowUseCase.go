@@ -4,6 +4,8 @@ import (
     "Multi/src/interruptors/window/domain"
     "Multi/src/interruptors/window/domain/entities"
     "Multi/src/interruptors/window/application/repositorys"
+    "encoding/json"
+    "log"
 )
 
 type WindowUseCase struct {
@@ -28,4 +30,22 @@ func (uc *WindowUseCase) GetWindowDataByID(id int) (*entities.WindowSensor, erro
 
 func (uc *WindowUseCase) CreateWindowData(data *entities.WindowSensor) error {
     return uc.repo.Create(data)
+}
+
+func (uc *WindowUseCase) ProcessWindowData(message []byte) error {
+    var windowData entities.WindowSensor
+    err := json.Unmarshal(message, &windowData)
+    if err != nil {
+        log.Printf("Error unmarshalling window data: %v", err)
+        return err
+    }
+
+    err = uc.CreateWindowData(&windowData)
+    if err != nil {
+        log.Printf("Error saving window data: %v", err)
+        return err
+    }
+
+    log.Printf("Window data processed and saved: %+v", windowData)
+    return nil
 }

@@ -4,6 +4,8 @@ import (
     "Multi/src/interruptors/gas/domain"
     "Multi/src/interruptors/gas/domain/entities"
     "Multi/src/interruptors/gas/application/repositorys"
+    "encoding/json"
+    "log"
 )
 
 type GasUseCase struct {
@@ -28,4 +30,22 @@ func (uc *GasUseCase) GetGasDataByID(id int) (*entities.GasSensor, error) {
 
 func (uc *GasUseCase) CreateGasData(data *entities.GasSensor) error {
     return uc.repo.Create(data)
+}
+
+func (uc *GasUseCase) ProcessGasData(message []byte) error {
+    var gasData entities.GasSensor
+    err := json.Unmarshal(message, &gasData)
+    if err != nil {
+        log.Printf("Error unmarshalling gas data: %v", err)
+        return err
+    }
+
+    err = uc.CreateGasData(&gasData)
+    if err != nil {
+        log.Printf("Error saving gas data: %v", err)
+        return err
+    }
+
+    log.Printf("Gas data processed and saved: %+v", gasData)
+    return nil
 }

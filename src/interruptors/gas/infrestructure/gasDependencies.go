@@ -10,8 +10,10 @@ import (
 
 func InitGas() (*service.GasService, *adapters.RabbitConsumer) {
     rabbitMQ, err := adapters.NewRabbitConsumer(
-        "amqp://user:password@localhost:5672/",
-        "GasQueue",
+        "amqp://uriel:eduardo117@3.228.81.226:5672/",
+        "amq.topic",                         
+        "gas",                            
+        "sensor.mq2",                        
     )
     if err != nil {
         log.Fatalf("Failed to initialize RabbitMQ: %v", err)

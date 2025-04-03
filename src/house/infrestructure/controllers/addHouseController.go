@@ -20,12 +20,25 @@ func NewAddHouseController(addHouseUseCase *application.AddHouseUseCase) *AddHou
 
 func (ac *AddHouseController) AddHouse(c *gin.Context) {
     var house entities.HouseProfile
-    if err := c.ShouldBindJSON(&house); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "Formato JSON inválido", "details": err.Error()})
+    if err := c.ShouldBind(&house); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Formato inválido", "details": err.Error()})
         return
     }
 
-    if err := ac.addHouseUseCase.AddHouse(&house); err != nil {
+    file, err := c.FormFile("image")
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Error al obtener la imagen", "details": err.Error()})
+        return
+    }
+
+    src, err := file.Open()
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al abrir la imagen", "details": err.Error()})
+        return
+    }
+    defer src.Close()
+
+    if err := ac.addHouseUseCase.AddHouse(&house, file.Filename, src); err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al agregar la casa", "details": err.Error()})
         return
     }
