@@ -1,43 +1,38 @@
 package application
 
 import (
-    "Multi/src/interruptors/door/domain"
-    "Multi/src/interruptors/door/domain/entities"
-    "Multi/src/interruptors/door/application/repositorys"
-    "encoding/json"
-    "log"
+	"Multi/src/interruptors/door/domain"
+	"Multi/src/interruptors/door/domain/entities"
+	"log"
+	"strconv"
 )
 
 type AlertDoorUseCase struct {
-    repo       domain.DoorRepository
-    rabbitRepo *repositorys.RabbitRepository
+	doorRepo      domain.DoorRepository
+	messagingRepo domain.MessagingRepository // Usar la interfaz en lugar del tipo concreto
 }
 
-func NewAlertDoorUseCase(repo domain.DoorRepository, rabbitRepo *repositorys.RabbitRepository) *AlertDoorUseCase {
-    return &AlertDoorUseCase{
-        repo:       repo,
-        rabbitRepo: rabbitRepo,
-    }
+func NewAlertDoorUseCase(doorRepo domain.DoorRepository, messagingRepo domain.MessagingRepository) *AlertDoorUseCase {
+	return &AlertDoorUseCase{
+		doorRepo:      doorRepo,
+		messagingRepo: messagingRepo,
+	}
 }
 
-func (uc *AlertDoorUseCase) Create(data *entities.DoorData) error {
-    return uc.repo.Create(data)
-}
+func (uc *AlertDoorUseCase) Create(doorData *entities.DoorData) error {
+	// Guardar en la base de datos
+	err := uc.doorRepo.Create(doorData)
+	if err != nil {
+		return err
+	}
 
-func (uc *AlertDoorUseCase) ProcessDoorData(message []byte) error {
-    var doorData entities.DoorData
-    err := json.Unmarshal(message, &doorData)
-    if err != nil {
-        log.Printf("Error unmarshalling door data: %v", err)
-        return err
-    }
+	// Enviar comando a la puerta
+	statusStr := strconv.Itoa(doorData.Status)
+	err = uc.messagingRepo.SendDoorCommand([]byte(statusStr))
+	if err != nil {
+		log.Printf("Error al enviar comando a la puerta: %v", err)
+		// Decide si quieres manejar este error o simplemente loggearlo
+	}
 
-    err = uc.repo.Create(&doorData)
-    if err != nil {
-        log.Printf("Error saving door data: %v", err)
-        return err
-    }
-
-    log.Printf("Door data processed and saved: %+v", doorData)
-    return nil
+	return nil
 }

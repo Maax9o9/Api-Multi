@@ -1,113 +1,86 @@
 package adapters
 
 import (
-    "log"
+	"fmt"
+	"log"
+	"time"
 
-    "github.com/streadway/amqp"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-type RabbitConsumer struct {
-    Connection *amqp.Connection
-    Channel    *amqp.Channel
-    QueueName  string
+type MQTTPublisher struct {
+	Client  mqtt.Client
+	Options *mqtt.ClientOptions
 }
 
-func NewRabbitConsumer(rabbitURL, exchangeName, queueName, routingKey string) (*RabbitConsumer, error) {
-    conn, err := amqp.Dial(rabbitURL)
-    if err != nil {
-        log.Printf("Error al conectar con RabbitMQ: %v", err)
-        return nil, err
-    }
+// NewMQTTPublisher crea una nueva instancia de publicador MQTT
+func NewMQTTPublisher(brokerURL, clientID string, username, password string) (*MQTTPublisher, error) {
+	// Configurar opciones del cliente MQTT
+	opts := mqtt.NewClientOptions()
+	opts.AddBroker(brokerURL)
+	opts.SetClientID(clientID)
 
-    ch, err := conn.Channel()
-    if err != nil {
-        conn.Close()
-        log.Printf("Error al crear el canal de RabbitMQ: %v", err)
-        return nil, err
-    }
+	// Configurar credenciales si se proporcionan
+	if username != "" {
+		opts.SetUsername(username)
+		opts.SetPassword(password)
+	}
 
-    err = ch.ExchangeDeclare(
-        exchangeName, // name
-        "topic",     // type
-        true,         // durable
-        false,        // auto-deleted
-        false,        // internal
-        false,        // no-wait
-        nil,          // arguments
-    )
-    if err != nil {
-        ch.Close()
-        conn.Close()
-        log.Printf("Error al declarar el exchange: %v", err)
-        return nil, err
-    }
+	// Configurar callbacks
+	opts.SetOnConnectHandler(func(client mqtt.Client) {
+		log.Println("Conectado al broker MQTT")
+	})
 
-    q, err := ch.QueueDeclare(
-        queueName, // name
-        true,      // durable
-        false,     // delete when unused
-        false,     // exclusive
-        false,     // no-wait
-        nil,       // arguments
-    )
-    if err != nil {
-        ch.Close()
-        conn.Close()
-        log.Printf("Error al declarar la cola: %v", err)
-        return nil, err
-    }
+	opts.SetConnectionLostHandler(func(client mqtt.Client, err error) {
+		log.Printf("Conexión MQTT perdida: %v", err)
+	})
 
-    err = ch.QueueBind(
-        q.Name,       // queue name
-        routingKey,   // routing key
-        exchangeName, // exchange
-        false,        // no-wait
-        nil,          // arguments
-    )
-    if err != nil {
-        ch.Close()
-        conn.Close()
-        log.Printf("Error al enlazar la cola: %v", err)
-        return nil, err
-    }
+	// Conexión persistente
+	opts.SetAutoReconnect(true)
+	opts.SetMaxReconnectInterval(1 * time.Minute)
+	opts.SetKeepAlive(30 * time.Second)
 
-    return &RabbitConsumer{
-        Connection: conn,
-        Channel:    ch,
-        QueueName:  q.Name,
-    }, nil
+	// Crear el cliente MQTT
+	client := mqtt.NewClient(opts)
+
+	// Conectar al broker
+	token := client.Connect()
+	if token.Wait() && token.Error() != nil {
+		return nil, fmt.Errorf("error al conectar con el broker MQTT: %v", token.Error())
+	}
+
+	return &MQTTPublisher{
+		Client:  client,
+		Options: opts,
+	}, nil
 }
 
-func (r *RabbitConsumer) ConsumeMessages(processMessage func(body []byte)) error {
-    msgs, err := r.Channel.Consume(
-        r.QueueName, // queue
-        "",          // consumer
-        true,        // auto-ack
-        false,       // exclusive
-        false,       // no-local
-        false,       // no-wait
-        nil,         // args
-    )
-    if err != nil {
-        log.Printf("Error al consumir mensajes de RabbitMQ: %v", err)
-        return err
-    }
+// PublishMessage publica un mensaje en un topic MQTT
+func (m *MQTTPublisher) PublishMessage(topic string, message []byte) error {
+	// Asegurar que estamos conectados
+	if !m.Client.IsConnected() {
+		log.Println("Reconectando al broker MQTT...")
+		token := m.Client.Connect()
+		if token.Wait() && token.Error() != nil {
+			return fmt.Errorf("error al reconectar con MQTT: %v", token.Error())
+		}
+	}
 
-    go func() {
-        for d := range msgs {
-            log.Printf("Mensaje recibido: %s", d.Body)
-            processMessage(d.Body) // Procesar el mensaje
-        }
-    }()
+	// Publicar el mensaje
+	token := m.Client.Publish(topic, 0, false, message)
+	token.Wait()
 
-    return nil
+	if token.Error() != nil {
+		return fmt.Errorf("error al publicar mensaje MQTT: %v", token.Error())
+	}
+
+	log.Printf("Mensaje MQTT publicado exitosamente en el topic %s: %s", topic, string(message))
+	return nil
 }
 
-func (r *RabbitConsumer) Close() {
-    if err := r.Channel.Close(); err != nil {
-        log.Printf("Error al cerrar el canal de RabbitMQ: %v", err)
-    }
-    if err := r.Connection.Close(); err != nil {
-        log.Printf("Error al cerrar la conexión de RabbitMQ: %v", err)
-    }
+// Close cierra la conexión MQTT
+func (m *MQTTPublisher) Close() {
+	if m.Client.IsConnected() {
+		m.Client.Disconnect(250)
+	}
 }

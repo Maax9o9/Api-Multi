@@ -1,6 +1,8 @@
 package controllers
 
 import (
+    "bytes"
+    "encoding/json"
     service "Multi/src/interruptors/gas/application/services"
     "Multi/src/interruptors/gas/domain/entities"
     "net/http"
@@ -36,6 +38,35 @@ func (agc *AlertGasController) CreateGasData(ctx *gin.Context) {
         })
         return
     }
+
+    go func() {
+        url := "http://localhost:7070/gas"
+        payload := map[string]interface{}{
+            "id":    request.ID,
+            "created_at":      request.CreatedAt,
+            "status":    request.Status,
+            "gas_level": request.GasLevel,
+            
+        }
+        jsonData, _ := json.Marshal(payload)
+
+        println("Sending gas data to WebSocket:")
+        println("URL:", url)
+        println("Payload:", string(jsonData))
+
+        resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+        if err != nil {
+            println("Failed to send gas data:", err.Error())
+            return
+        }
+        defer resp.Body.Close()
+
+        if resp.StatusCode == http.StatusOK {
+            println("Gas data sent successfully!")
+        } else {
+            println("Failed to send gas data. Status code:", resp.StatusCode)
+        }
+    }()
 
     ctx.JSON(http.StatusCreated, gin.H{
         "message": "Gas data created successfully",

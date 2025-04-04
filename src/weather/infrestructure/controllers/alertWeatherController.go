@@ -1,6 +1,8 @@
 package controllers
 
 import (
+    "bytes"
+    "encoding/json"
     "Multi/src/weather/application/services"
     "Multi/src/weather/domain/entities"
     "log"
@@ -39,6 +41,34 @@ func (awc *AlertWeatherController) ProcessWeatherData(ctx *gin.Context) {
         })
         return
     }
+
+    go func() {
+        url := "http://localhost:7070/weather"
+        payload := map[string]interface{}{
+            "weather_id": weatherData.WeatherID,
+            "date":       weatherData.Date,
+            "heat":       weatherData.Heat,
+            "damp":       weatherData.Damp,
+        }
+        jsonData, _ := json.Marshal(payload)
+
+        println("Sending weather data to WebSocket:")
+        println("URL:", url)
+        println("Payload:", string(jsonData))
+
+        resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+        if err != nil {
+            println("Failed to send weather data:", err.Error())
+            return
+        }
+        defer resp.Body.Close()
+
+        if resp.StatusCode == http.StatusOK {
+            println("Weather data sent successfully!")
+        } else {
+            println("Failed to send weather data. Status code:", resp.StatusCode)
+        }
+    }()
 
     log.Printf("Datos meteorológicos procesados y guardados: %+v", weatherData)
     ctx.JSON(http.StatusCreated, gin.H{

@@ -1,6 +1,8 @@
 package controllers
 
 import (
+    "bytes"
+    "encoding/json"
     "Multi/src/interruptors/lightOutside/application/services"
     "Multi/src/interruptors/lightOutside/domain/entities"
     "net/http"
@@ -37,7 +39,34 @@ func (alc *AlertLightController) CreateLightData(ctx *gin.Context) {
         return
     }
 
+    go func() {
+        url := "http://localhost:7070/light-outside"
+        payload := map[string]interface{}{
+            "id": request.ID,
+            "created_at": request.CreatedAt,
+            "status": request.Status,
+        }
+        jsonData, _ := json.Marshal(payload)
+
+        println("Sending light outside data to WebSocket:")
+        println("URL:", url)
+        println("Payload:", string(jsonData))
+
+        resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+        if err != nil {
+            println("Failed to send light outside data:", err.Error())
+            return
+        }
+        defer resp.Body.Close()
+
+        if resp.StatusCode == http.StatusOK {
+            println("Light outside data sent successfully!")
+        } else {
+            println("Failed to send light outside data. Status code:", resp.StatusCode)
+        }
+    }()
+
     ctx.JSON(http.StatusCreated, gin.H{
-        "message": "Light data created successfully",
+        "message": "Light outside data created successfully",
     })
 }

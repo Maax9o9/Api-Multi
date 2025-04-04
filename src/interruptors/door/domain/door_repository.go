@@ -3,7 +3,11 @@ package domain
 import "Multi/src/interruptors/door/domain/entities"
 
 type DoorRepository interface {
-    Create(data *entities.DoorData) error
-    GetAll() ([]entities.DoorData, error)
-    GetByID(id int) (*entities.DoorData, error)
+	Create(data *entities.DoorData) error
+	GetAll() ([]entities.DoorData, error)
+	GetByID(id int) (*entities.DoorData, error)
+}
+
+type MessagingRepository interface {
+	SendDoorCommand(command []byte) error
 }

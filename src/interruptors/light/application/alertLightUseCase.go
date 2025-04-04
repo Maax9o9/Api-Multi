@@ -1,47 +1,39 @@
 package application
 
 import (
-    "Multi/src/interruptors/light/domain"
-    "Multi/src/interruptors/light/domain/entities"
-    "Multi/src/interruptors/light/application/repositorys"
-    "encoding/json"
-    "log"
+	"Multi/src/interruptors/light/application/repositorys"
+	"Multi/src/interruptors/light/domain"
+	"Multi/src/interruptors/light/domain/entities"
+	"log"
+	"strconv"
 )
 
 type AlertLightUseCase struct {
-    repo       domain.LightRepository
-    rabbitRepo *repositorys.RabbitRepository
+	lightRepo  domain.LightRepository
+	rabbitRepo *repositorys.RabbitRepository
 }
 
-func NewAlertLightUseCase(repo domain.LightRepository, rabbitRepo *repositorys.RabbitRepository) *AlertLightUseCase {
-    return &AlertLightUseCase{
-        repo:       repo,
-        rabbitRepo: rabbitRepo,
-    }
+func NewAlertLightUseCase(lightRepo domain.LightRepository, rabbitRepo *repositorys.RabbitRepository) *AlertLightUseCase {
+	return &AlertLightUseCase{
+		lightRepo:  lightRepo,
+		rabbitRepo: rabbitRepo,
+	}
 }
 
-func (uc *AlertLightUseCase) CreateLightData(data *entities.LightData) error {
-    return uc.repo.Create(data)
-}
+// CreateLightData crea un nuevo registro de iluminación y envía el comando a través de RabbitMQ
+func (uc *AlertLightUseCase) CreateLightData(lightData *entities.LightData) error {
+	// Guardar en la base de datos
+	err := uc.lightRepo.Create(lightData)
+	if err != nil {
+		return err
+	}
 
-func (uc *AlertLightUseCase) ProcessLightData(message []byte) error {
-    var lightData entities.LightData
-    err := json.Unmarshal(message, &lightData)
-    if err != nil {
-        log.Printf("Error unmarshalling light data: %v", err)
-        return err
-    }
+	// Enviar comando al sistema de iluminación a través de RabbitMQ
+	statusStr := strconv.Itoa(lightData.Status)
+	err = uc.rabbitRepo.SendLightCommand([]byte(statusStr))
+	if err != nil {
+		log.Printf("Error al enviar comando a RabbitMQ, pero continuando: %v", err)
+	}
 
-    err = uc.CreateLightData(&lightData)
-    if err != nil {
-        log.Printf("Error saving light data: %v", err)
-        return err
-    }
-
-    log.Printf("Light data processed and saved: %+v", lightData)
-    return nil
-}
-
-func (uc *AlertLightUseCase) ProcessLightCommands(processMessage func(body []byte)) error {
-    return uc.rabbitRepo.ProcessLightCommands(processMessage)
+	return nil
 }

@@ -1,20 +1,20 @@
 package application
 
 import (
-    "Multi/src/interruptors/door/domain"
-    "Multi/src/interruptors/door/domain/entities"
+	"Multi/src/interruptors/door/domain"
+	"Multi/src/interruptors/door/domain/entities"
 )
 
 type ReceiveDoorUseCase struct {
-    repo domain.DoorRepository
+	repo domain.DoorRepository
 }
 
 func NewReceiveDoorUseCase(repo domain.DoorRepository) *ReceiveDoorUseCase {
-    return &ReceiveDoorUseCase{
-        repo: repo,
-    }
+	return &ReceiveDoorUseCase{
+		repo: repo,
+	}
 }
 
 func (uc *ReceiveDoorUseCase) GetAll() ([]entities.DoorData, error) {
-    return uc.repo.GetAll()
+	return uc.repo.GetAll()
 }

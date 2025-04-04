@@ -1,33 +1,34 @@
 package infrestructure
 
 import (
-    "Multi/src/interruptors/door/application"
-    "Multi/src/interruptors/door/application/repositorys"
-    "Multi/src/interruptors/door/application/services"
-    "Multi/src/interruptors/door/infrestructure/adapters"
-    "log"
+	"Multi/src/interruptors/door/application"
+	"Multi/src/interruptors/door/application/repositorys"
+	service "Multi/src/interruptors/door/application/services"
+	"Multi/src/interruptors/door/infrestructure/adapters"
+	"log"
+	"time"
 )
 
-func InitDoor() (*service.AlertDoorService, *service.ReceiveDoorService, *adapters.RabbitConsumer) {
-    rabbitMQ, err := adapters.NewRabbitConsumer(
-        "amqp://uriel:eduardo117@3.228.81.226:5672/",
-        "amq.topic",    // Exchange
-        "puerta",       // Queue
-        "sensor.puerta", // Routing Key
-    )
-    if err != nil {
-        log.Fatalf("Failed to initialize RabbitMQ: %v", err)
-    }
+func InitDoor() (*service.AlertDoorService, *service.ReceiveDoorService, *adapters.MQTTPublisher) {
+	mqttPublisher, err := adapters.NewMQTTPublisher(
+		"tcp://3.228.81.226:1883",             // URL de tu broker RabbitMQ con puerto MQTT
+		"door-api-client"+time.Now().String(), // Client ID único
+		"uriel",                               // Usuario de RabbitMQ
+		"eduardo117",                          // Contraseña de RabbitMQ
+	)
+	if err != nil {
+		log.Fatalf("Error al inicializar el publicador MQTT: %v", err)
+	}
 
-    rabbitRepo := repositorys.NewRabbitRepository(rabbitMQ)
-    doorRepo := NewPostgres()
+	mqttRepo := repositorys.NewMQTTRepository(mqttPublisher)
+	doorRepo := NewPostgres()
 
-    getAllDoorUseCase := application.NewReceiveDoorUseCase(doorRepo)
-    getDoorByIDUseCase := application.NewGetDoorByIDUseCase(doorRepo)
+	getAllDoorUseCase := application.NewReceiveDoorUseCase(doorRepo)
+	getDoorByIDUseCase := application.NewGetDoorByIDUseCase(doorRepo)
 
-    alertDoorUseCase := application.NewAlertDoorUseCase(doorRepo, rabbitRepo)
-    alertDoorService := service.NewAlertDoorService(alertDoorUseCase)
-    receiveDoorService := service.NewReceiveDoorService(getAllDoorUseCase, getDoorByIDUseCase)
+	alertDoorUseCase := application.NewAlertDoorUseCase(doorRepo, mqttRepo)
+	alertDoorService := service.NewAlertDoorService(alertDoorUseCase)
+	receiveDoorService := service.NewReceiveDoorService(getAllDoorUseCase, getDoorByIDUseCase)
 
-    return alertDoorService, receiveDoorService, rabbitMQ
+	return alertDoorService, receiveDoorService, mqttPublisher
 }

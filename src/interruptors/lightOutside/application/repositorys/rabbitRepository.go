@@ -1,26 +1,31 @@
 package repositorys
 
 import (
-    "Multi/src/interruptors/lightOutside/infrestructure/adapters"
-    "log"
+	"Multi/src/interruptors/lightOutside/infrestructure/adapters"
+	"log"
 )
 
 type RabbitRepository struct {
-    rabbitMQ *adapters.RabbitConsumer
+	publisher *adapters.RabbitPublisher
 }
 
-func NewRabbitRepository(rabbitMQ *adapters.RabbitConsumer) *RabbitRepository {
-    return &RabbitRepository{rabbitMQ: rabbitMQ}
+// NewRabbitRepository crea un nuevo repositorio que utiliza RabbitMQ para enviar comandos
+func NewRabbitRepository(publisher *adapters.RabbitPublisher) *RabbitRepository {
+	return &RabbitRepository{publisher: publisher}
 }
 
-func (repo *RabbitRepository) ProcessLightCommands(processMessage func(body []byte)) error {
-    err := repo.rabbitMQ.ConsumeMessages(func(body []byte) {
-        log.Printf("Processing light command: %s", body)
-        processMessage(body)
-    })
-    if err != nil {
-        log.Printf("Failed to process light commands: %v", err)
-        return err
-    }
-    return nil
+// SendLightOutsideCommand envía un comando al sistema de iluminación exterior a través de RabbitMQ
+func (repo *RabbitRepository) SendLightOutsideCommand(command []byte) error {
+	// La routing key específica para comandos de iluminación exterior
+	routingKey := "light.out"
+
+	// Publicar el comando
+	err := repo.publisher.PublishMessage(routingKey, command)
+	if err != nil {
+		log.Printf("Error al enviar comando de iluminación exterior: %v", err)
+		return err
+	}
+
+	log.Printf("Comando de iluminación exterior enviado correctamente: %s", string(command))
+	return nil
 }

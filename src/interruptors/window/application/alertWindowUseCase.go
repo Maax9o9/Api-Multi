@@ -1,43 +1,40 @@
 package application
 
 import (
-    "Multi/src/interruptors/window/domain"
-    "Multi/src/interruptors/window/domain/entities"
-    "Multi/src/interruptors/window/application/repositorys"
-    "encoding/json"
-    "log"
+	"Multi/src/interruptors/window/application/repositorys"
+	"Multi/src/interruptors/window/domain"
+	"Multi/src/interruptors/window/domain/entities"
+	"log"
+	"strconv"
 )
 
 type AlertWindowUseCase struct {
-    repo       domain.WindowRepository
-    rabbitRepo *repositorys.RabbitRepository
+	windowRepo domain.WindowRepository
+	rabbitRepo *repositorys.RabbitRepository
 }
 
-func NewAlertWindowUseCase(repo domain.WindowRepository, rabbitRepo *repositorys.RabbitRepository) *AlertWindowUseCase {
-    return &AlertWindowUseCase{
-        repo:       repo,
-        rabbitRepo: rabbitRepo,
-    }
+func NewAlertWindowUseCase(windowRepo domain.WindowRepository, rabbitRepo *repositorys.RabbitRepository) *AlertWindowUseCase {
+	return &AlertWindowUseCase{
+		windowRepo: windowRepo,
+		rabbitRepo: rabbitRepo,
+	}
 }
 
-func (uc *AlertWindowUseCase) CreateWindowData(data *entities.WindowSensor) error {
-    return uc.repo.Create(data)
-}
+// Create implementa el método requerido por la interfaz (asegúrate de que coincida con tu interfaz)
+func (uc *AlertWindowUseCase) CreateWindowData(windowData *entities.WindowSensor) error {
+	// Guardar en la base de datos
+	err := uc.windowRepo.Create(windowData)
+	if err != nil {
+		return err
+	}
 
-func (uc *AlertWindowUseCase) ProcessWindowData(message []byte) error {
-    var windowData entities.WindowSensor
-    err := json.Unmarshal(message, &windowData)
-    if err != nil {
-        log.Printf("Error unmarshalling window data: %v", err)
-        return err
-    }
+	// Enviar comando a la ventana a través de RabbitMQ
+	statusStr := strconv.Itoa(windowData.Status)
+	err = uc.rabbitRepo.SendWindowCommand([]byte(statusStr))
+	if err != nil {
+		// Aquí puedes elegir si quieres manejar el error o solo loggearlo
+		log.Printf("Error al enviar comando a RabbitMQ, pero continuando: %v", err)
+	}
 
-    err = uc.CreateWindowData(&windowData)
-    if err != nil {
-        log.Printf("Error saving window data: %v", err)
-        return err
-    }
-
-    log.Printf("Window data processed and saved: %+v", windowData)
-    return nil
+	return nil
 }

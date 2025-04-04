@@ -1,6 +1,8 @@
 package controllers
 
 import (
+    "bytes"
+    "encoding/json"
     "Multi/src/notification/application"
     "net/http"
 
@@ -47,6 +49,31 @@ func (c *CreateNotificationController) CreateNotification(ctx *gin.Context) {
         }
         return
     }
+
+    go func() {
+        url := "http://localhost:7070/notify"
+        payload := map[string]string{
+            "message": request.Message,
+        }
+        jsonData, _ := json.Marshal(payload)
+
+        println("Sending notification to WebSocket:")
+        println("URL:", url)
+        println("Payload:", string(jsonData))
+
+        resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+        if err != nil {
+            println("Failed to send notification:", err.Error())
+            return
+        }
+        defer resp.Body.Close()
+
+        if resp.StatusCode == http.StatusOK {
+            println("Notification sent successfully!")
+        } else {
+            println("Failed to send notification. Status code:", resp.StatusCode)
+        }
+    }()
 
     ctx.JSON(http.StatusCreated, gin.H{
         "message": "Notification created successfully",
