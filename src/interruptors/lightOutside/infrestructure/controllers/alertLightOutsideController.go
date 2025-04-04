@@ -40,7 +40,7 @@ func (alc *AlertLightController) CreateLightData(ctx *gin.Context) {
     }
 
     go func() {
-        url := "http://54.160.249.225:7070/light-outside"
+        url := "http://35.171.234.157:7070/light-outside"
         payload := map[string]interface{}{
             "id": request.ID,
             "created_at": request.CreatedAt,

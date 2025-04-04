@@ -43,7 +43,7 @@ func (awc *AlertWeatherController) ProcessWeatherData(ctx *gin.Context) {
     }
 
     go func() {
-        url := "http://54.160.249.225:7070/weather"
+        url := "http://35.171.234.157:7070/weather"
         payload := map[string]interface{}{
             "weather_id": weatherData.WeatherID,
             "date":       weatherData.Date,
