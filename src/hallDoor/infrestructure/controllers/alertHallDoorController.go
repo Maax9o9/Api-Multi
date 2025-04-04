@@ -43,7 +43,7 @@ func (ahdc *AlertHallDoorController) ProcessHallDoorData(ctx *gin.Context) {
     }
 
     go func() {
-        url := "http://localhost:7070/hall-door"
+        url := "http://54.160.249.225:7070/hall-door"
         payload := map[string]interface{}{
             "id": hallDoorData.ID,
             "date":         hallDoorData.Date,

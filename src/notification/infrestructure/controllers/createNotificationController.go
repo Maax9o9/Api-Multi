@@ -51,7 +51,7 @@ func (c *CreateNotificationController) CreateNotification(ctx *gin.Context) {
     }
 
     go func() {
-        url := "http://localhost:7070/notify"
+        url := "http://54.160.249.225:7070/notify"
         payload := map[string]string{
             "message": request.Message,
         }

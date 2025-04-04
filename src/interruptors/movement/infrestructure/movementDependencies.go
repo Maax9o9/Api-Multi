@@ -71,7 +71,7 @@ func InitMovement() (*service.AlertMovementService, *service.ReceiveMovementServ
 }
 
 func sendMovementDataToWebSocket(id, status int) {
-	url := "http://localhost:7070/motion" // Ajusta según la URL de tu endpoint
+	url := "http://54.160.249.225:7070/motion" // Ajusta según la URL de tu endpoint
 
 	// Crear el payload según la estructura esperada
 	payload := map[string]interface{}{

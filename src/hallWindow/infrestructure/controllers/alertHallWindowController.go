@@ -43,7 +43,7 @@ func (ahwc *AlertHallWindowController) ProcessHallWindowData(ctx *gin.Context) {
     }
 
     go func() {
-        url := "http://localhost:7070/hall-window" 
+        url := "http://54.160.249.225:7070/hall-window" 
         payload := map[string]interface{}{
             "id": hallWindowData.ID,
             "date":           hallWindowData.Date,

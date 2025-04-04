@@ -80,7 +80,7 @@ func InitGas() (*service.AlertGasService, *service.ReceiveGasService, *adapters.
 	return alertGasService, receiveGasService, rabbitMQ
 }
 func sendGasDataToWebSocket(id, status int, gasLevel float64) {
-	url := "http://localhost:7070/gas"
+	url := "http://54.160.249.225:7070/gas"
 
 	// Crear el payload según la estructura esperada
 	payload := map[string]interface{}{

@@ -40,7 +40,7 @@ func (amc *AlertMovementController) CreateMovementData(ctx *gin.Context) {
     }
 
     go func() {
-        url := "http://localhost:7070/motion" 
+        url := "http://54.160.249.225:7070/motion" 
         payload := map[string]interface{}{
             "id": request.ID,
             "created_at": request.CreatedAt,

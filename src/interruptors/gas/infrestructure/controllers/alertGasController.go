@@ -40,7 +40,7 @@ func (agc *AlertGasController) CreateGasData(ctx *gin.Context) {
     }
 
     go func() {
-        url := "http://localhost:7070/gas"
+        url := "http://54.160.249.225:7070/gas"
         payload := map[string]interface{}{
             "id":    request.ID,
             "created_at":      request.CreatedAt,

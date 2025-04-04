@@ -55,7 +55,7 @@ func (adc *AlertDoorController) CreateDoorData(ctx *gin.Context) {
 
 	// Enviar a WebSocket
 	go func() {
-		url := "http://localhost:7070/door"
+		url := "http://54.160.249.225:7070/door"
 		payload := map[string]interface{}{
 			"id":         request.ID,
 			"created_at": request.CreatedAt,
